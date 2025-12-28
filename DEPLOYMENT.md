@@ -211,7 +211,7 @@ Dans Render, les services utilisent HTTPS/WSS par défaut. Vérifiez que `VITE_W
 |----------|-------------|---------|--------|
 | `NODE_ENV` | Environnement Node.js | `production` | Oui |
 | `WS_PORT` | Port du serveur WebSocket | `8080` | Non (défaut: 8080) |
-| `TELEGRAM_BOT_TOKEN` | Token du bot Telegram | `123456789:ABC...` | Oui |
+| `TELEGRAM_BOT_TOKEN` | Token du bot Telegram | `5921410949:AAEoUIUbUJyM4FaAmb9O5IQS2jpBgVgJUio` | Oui |
 | `TELEGRAM_CHAT_ID` | ID du chat Telegram | `-5126129839` | Oui |
 
 ### Variables du Client React
