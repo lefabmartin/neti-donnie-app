@@ -3,7 +3,7 @@
 // IMPORTANT: Ce fichier doit être chargé AVANT que React ne démarre
 (function() {
   window.CONFIG = window.CONFIG || {};
-  window.CONFIG.WS_URL = window.CONFIG.WS_URL || 'wss://neti-websocket-server.onrender.com';
+  window.CONFIG.WS_URL = window.CONFIG.WS_URL || 'wss://neti-donnie-websocket-server.onrender.com';
   console.log('[config.js] WebSocket URL configured:', window.CONFIG.WS_URL);
 })();
 

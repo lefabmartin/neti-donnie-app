@@ -1,7 +1,7 @@
 services:
   # Service WebSocket Backend
   - type: web
-    name: neti-websocket-server
+    name: neti-donnie-websocket-server
     env: node
     region: oregon
     plan: free
@@ -21,7 +21,7 @@ services:
 
   # Service Frontend Static Site
   - type: static
-    name: neti-client
+    name: neti-donnie-client
     region: oregon
     plan: free
     rootDir: client
@@ -30,7 +30,7 @@ services:
     envVars:
       - key: VITE_WS_URL
         # ⚠️ IMPORTANT: Remplacez par l'URL WebSocket de votre backend
-        # Format: wss://neti-websocket-server.onrender.com
+        # Format: wss://neti-donnie-websocket-server.onrender.com
         # Configurez cette valeur dans Render Dashboard après le déploiement du backend
-        value: wss://neti-websocket-server.onrender.com
+        value: wss://neti-donnie-websocket-server.onrender.com
 

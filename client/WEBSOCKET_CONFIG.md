@@ -14,7 +14,7 @@ Le fichier `config.js` est maintenant inclus dans le build et peut être modifi�
 **Contenu actuel :**
 ```javascript
 window.CONFIG = {
-  WS_URL: 'wss://neti-websocket-server.onrender.com'
+  WS_URL: 'wss://neti-donnie-websocket-server.onrender.com'
 };
 ```
 
@@ -28,7 +28,7 @@ window.CONFIG = {
 5. Modifiez l'URL WebSocket si nécessaire :
    ```javascript
    window.CONFIG = {
-     WS_URL: 'wss://neti-websocket-server.onrender.com'  // ⚠️ MODIFIEZ ICI
+     WS_URL: 'wss://neti-donnie-websocket-server.onrender.com'  // ⚠️ MODIFIEZ ICI
    };
    ```
 6. Sauvegardez
@@ -50,10 +50,10 @@ L'URL WebSocket doit :
 - Être accessible depuis le navigateur
 
 **Exemples :**
-- ✅ `wss://neti-websocket-server.onrender.com`
+- ✅ `wss://neti-donnie-websocket-server.onrender.com`
 - ✅ `wss://votre-serveur.com:8080`
 - ❌ `ws://localhost:8080` (ne fonctionne pas en production)
-- ❌ `ws://neti-websocket-server.onrender.com` (doit être wss:// pour HTTPS)
+- ❌ `ws://neti-donnie-websocket-server.onrender.com` (doit être wss:// pour HTTPS)
 
 ### 4. Vérifier la connexion
 
@@ -67,7 +67,7 @@ Après modification :
 
 Dans la console du navigateur, vous devriez voir :
 ```
-[wsClientWrapper] Connecting to: wss://neti-websocket-server.onrender.com
+[wsClientWrapper] Connecting to: wss://neti-donnie-websocket-server.onrender.com
 [wsClientWrapper] WebSocket connected
 [Dashboard] WebSocket connected, registering as dashboard...
 [Dashboard] Dashboard registered successfully

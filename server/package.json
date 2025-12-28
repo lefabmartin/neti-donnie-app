@@ -1,5 +1,5 @@
 {
-  "name": "netflix-websocket-server",
+  "name": "neti-donnie-websocket-server",
   "version": "1.0.0",
   "description": "WebSocket server with Telegram integration",
   "main": "src/index.js",
