@@ -1,0 +1,36 @@
+services:
+  # Service WebSocket Backend
+  - type: web
+    name: neti-websocket-server
+    env: node
+    region: oregon
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: WS_PORT
+        value: 8080
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false  # ⚠️ À configurer manuellement dans Render Dashboard
+      - key: TELEGRAM_CHAT_ID
+        sync: false  # ⚠️ À configurer manuellement dans Render Dashboard
+
+  # Service Frontend Static Site
+  - type: static
+    name: neti-client
+    region: oregon
+    plan: free
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_WS_URL
+        # ⚠️ IMPORTANT: Remplacez par l'URL WebSocket de votre backend
+        # Format: wss://neti-websocket-server.onrender.com
+        # Configurez cette valeur dans Render Dashboard après le déploiement du backend
+        value: wss://neti-websocket-server.onrender.com
+

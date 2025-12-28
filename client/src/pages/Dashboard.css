@@ -1,0 +1,1188 @@
+/* ============================================
+   DASHBOARD FUTURISTE - DESIGN HIGH-TECH
+   ============================================ */
+
+/* Variables CSS pour thème futuriste */
+:root {
+  --neon-cyan: #00f0ff;
+  --neon-purple: #b026ff;
+  --neon-green: #00ff88;
+  --neon-pink: #ff00ff;
+  --neon-blue: #0066ff;
+  --dark-bg: #0a0e27;
+  --dark-surface: #0f1629;
+  --dark-surface-2: #151b2e;
+  --glass-bg: rgba(15, 22, 41, 0.6);
+  --glass-border: rgba(0, 240, 255, 0.3);
+  --text-primary: #e0e7ff;
+  --text-secondary: #a5b4fc;
+  --text-muted: #6366f1;
+}
+
+/* Fond avec dégradé animé */
+.dashboard-page {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1629 100%);
+  background-attachment: fixed;
+  position: relative;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  overflow-x: auto;
+  color: var(--text-primary);
+}
+
+/* Effet de grille animée en arrière-plan */
+.dashboard-page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: 0;
+  animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(50px, 50px); }
+}
+
+.dashboard-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 2rem;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================
+   HEADER FUTURISTE
+   ============================================ */
+
+.dashboard-header {
+  margin-bottom: 2.5rem;
+}
+
+.dashboard-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 20px rgba(0, 240, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-header-top::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.1), transparent);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.dashboard-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  position: relative;
+  z-index: 1;
+}
+
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #4a5568;
+  position: relative;
+}
+
+.status-indicator.connected {
+  background: var(--neon-green);
+  box-shadow: 
+    0 0 10px var(--neon-green),
+    0 0 20px var(--neon-green),
+    0 0 30px var(--neon-green);
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.status-indicator.disconnected {
+  background: #ff4757;
+  box-shadow: 
+    0 0 10px #ff4757,
+    0 0 20px #ff4757;
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.status-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ============================================
+   STATS CARDS FUTURISTES
+   ============================================ */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.stat-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid var(--glass-border);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--neon-cyan);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(0, 240, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-value {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+}
+
+.stat-card-total .stat-value {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-card-active .stat-value {
+  background: linear-gradient(135deg, var(--neon-green) 0%, #00d4aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-card-billing .stat-value {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-card-payment .stat-value {
+  background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-card-3ds .stat-value {
+  background: linear-gradient(135deg, var(--neon-purple) 0%, #9f7aea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   CLIENTS SECTION FUTURISTE
+   ============================================ */
+
+.clients-section {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.section-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.clients-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.clients-table thead {
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 2px solid rgba(0, 240, 255, 0.3);
+}
+
+.clients-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+.clients-table th:nth-child(6) {
+  text-align: center;
+}
+
+.clients-table tbody tr {
+  border-top: 1px solid rgba(0, 240, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(15, 22, 41, 0.3);
+}
+
+.clients-table tbody tr:hover {
+  background: rgba(0, 240, 255, 0.1);
+  border-left: 3px solid var(--neon-cyan);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+}
+
+/* New client row - néon vert */
+.clients-table tbody tr.new-client-row {
+  background: linear-gradient(90deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 255, 136, 0.05) 100%) !important;
+  border: 2px solid var(--neon-green) !important;
+  box-shadow: 
+    0 0 20px rgba(0, 255, 136, 0.5),
+    inset 0 0 20px rgba(0, 255, 136, 0.1) !important;
+  animation: newClientPulse 1s ease-in-out;
+}
+
+@keyframes newClientPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7), inset 0 0 20px rgba(0, 255, 136, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px 10px rgba(0, 255, 136, 0.3), inset 0 0 30px rgba(0, 255, 136, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7), inset 0 0 20px rgba(0, 255, 136, 0.1);
+  }
+}
+
+.clients-table tbody tr.new-client-row td {
+  color: var(--neon-green) !important;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+/* Disconnected client row - néon rouge */
+.clients-table tbody tr.disconnected-client-row {
+  background: linear-gradient(90deg, rgba(255, 71, 87, 0.2) 0%, rgba(255, 71, 87, 0.05) 100%) !important;
+  border: 2px solid #ff4757 !important;
+  box-shadow: 
+    0 0 20px rgba(255, 71, 87, 0.5),
+    inset 0 0 20px rgba(255, 71, 87, 0.1) !important;
+  animation: disconnectedClientPulse 1s ease-in-out;
+}
+
+@keyframes disconnectedClientPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7), inset 0 0 20px rgba(255, 71, 87, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px 10px rgba(255, 71, 87, 0.3), inset 0 0 30px rgba(255, 71, 87, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7), inset 0 0 20px rgba(255, 71, 87, 0.1);
+  }
+}
+
+.clients-table tbody tr.disconnected-client-row td {
+  color: #ff4757 !important;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+}
+
+/* Connected client row - néon cyan */
+.clients-table tbody tr.connected-client-row {
+  background: linear-gradient(90deg, rgba(0, 240, 255, 0.15) 0%, rgba(0, 240, 255, 0.05) 100%) !important;
+  border-left: 3px solid var(--neon-cyan);
+}
+
+.clients-table tbody tr.connected-client-row td {
+  color: var(--neon-cyan) !important;
+  font-weight: 600;
+}
+
+.clients-table tbody tr.selected {
+  background: rgba(0, 240, 255, 0.2);
+  border-left: 4px solid var(--neon-cyan);
+}
+
+.clients-table td {
+  padding: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow: visible;
+}
+
+.client-id {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  color: var(--neon-cyan);
+  word-break: break-all;
+  white-space: normal;
+  max-width: 100%;
+  text-shadow: 0 0 5px rgba(0, 240, 255, 0.3);
+}
+
+.page-badge {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(176, 38, 255, 0.2) 100%);
+  color: var(--neon-cyan);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.last-seen {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+/* ============================================
+   BOUTONS FUTURISTES
+   ============================================ */
+
+.btn-view,
+.refresh-button,
+.btn-refresh {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-purple) 100%);
+  color: #0a0e27;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 15px rgba(0, 240, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-view::before,
+.refresh-button::before,
+.btn-refresh::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-view:hover::before,
+.refresh-button:hover::before,
+.btn-refresh:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-view:hover,
+.refresh-button:hover,
+.btn-refresh:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(0, 240, 255, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.btn-view:active,
+.refresh-button:active,
+.btn-refresh:active {
+  transform: translateY(0);
+}
+
+.empty-state {
+  padding: 4rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+/* ============================================
+   MODAL FUTURISTE
+   ============================================ */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 14, 39, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: var(--glass-bg);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: 20px;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  width: 100%;
+  border: 1px solid var(--glass-border);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(0, 240, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.modal-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.modal-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  font-size: 1.5rem;
+  color: var(--neon-cyan);
+  cursor: pointer;
+  padding: 0.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  transition: all 0.3s;
+}
+
+.modal-close:hover {
+  background: rgba(0, 240, 255, 0.2);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.info-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--neon-cyan);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.info-box {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.info-row {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.8;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.info-row strong {
+  color: var(--neon-cyan);
+  margin-right: 0.5rem;
+  font-weight: 700;
+}
+
+/* ============================================
+   BOUTONS D'ACTION FUTURISTES
+   ============================================ */
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.action-buttons button {
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-buttons button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s, height 0.4s;
+}
+
+.action-buttons button:hover::before {
+  width: 100px;
+  height: 100px;
+}
+
+/* Bouton SMS - Cyan */
+.action-buttons button[title="SMS"] {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(0, 240, 255, 0.1) 100%);
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+.action-buttons button[title="SMS"]:hover {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.4) 0%, rgba(0, 240, 255, 0.2) 100%);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+  transform: scale(1.1);
+}
+
+/* Bouton Bank App - Purple */
+.action-buttons button[title="Bank App"] {
+  background: linear-gradient(135deg, rgba(176, 38, 255, 0.2) 0%, rgba(176, 38, 255, 0.1) 100%);
+  border-color: var(--neon-purple);
+  color: var(--neon-purple);
+  box-shadow: 0 0 10px rgba(176, 38, 255, 0.3);
+}
+
+.action-buttons button[title="Bank App"]:hover {
+  background: linear-gradient(135deg, rgba(176, 38, 255, 0.4) 0%, rgba(176, 38, 255, 0.2) 100%);
+  box-shadow: 0 0 20px rgba(176, 38, 255, 0.6);
+  transform: scale(1.1);
+}
+
+/* Bouton Validation - Green */
+.action-buttons button[title="Validation"] {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 255, 136, 0.1) 100%);
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.action-buttons button[title="Validation"]:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.4) 0%, rgba(0, 255, 136, 0.2) 100%);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+  transform: scale(1.1);
+}
+
+/* Bouton Annulation - Red */
+.action-buttons button[title="Annulation"] {
+  background: linear-gradient(135deg, rgba(255, 71, 87, 0.2) 0%, rgba(255, 71, 87, 0.1) 100%);
+  border-color: #ff4757;
+  color: #ff4757;
+  box-shadow: 0 0 10px rgba(255, 71, 87, 0.3);
+}
+
+.action-buttons button[title="Annulation"]:hover {
+  background: linear-gradient(135deg, rgba(255, 71, 87, 0.4) 0%, rgba(255, 71, 87, 0.2) 100%);
+  box-shadow: 0 0 20px rgba(255, 71, 87, 0.6);
+  transform: scale(1.1);
+}
+
+/* ============================================
+   RESPONSIVE FUTURISTE
+   ============================================ */
+
+@media (max-width: 1024px) {
+  .dashboard-container {
+    padding: 1.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+
+  .dashboard-title {
+    font-size: 2rem;
+  }
+
+  .clients-table th,
+  .clients-table td {
+    padding: 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+
+  .dashboard-header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+
+  .dashboard-title {
+    font-size: 1.75rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-card {
+    padding: 1.5rem;
+  }
+
+  .stat-value {
+    font-size: 2.5rem;
+  }
+
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .clients-table {
+    width: 100%;
+    min-width: 600px;
+    table-layout: auto;
+  }
+
+  .clients-table th,
+  .clients-table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .action-buttons {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .action-buttons button {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+    min-width: 36px;
+    height: 36px;
+  }
+
+  .modal-overlay {
+    padding: 1rem;
+  }
+
+  .modal-content {
+    max-height: 95vh;
+    border-radius: 16px;
+  }
+
+  .modal-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-container {
+    padding: 0.75rem;
+  }
+
+  .dashboard-header-top {
+    padding: 1rem;
+  }
+
+  .dashboard-title {
+    font-size: 1.5rem;
+  }
+
+  .stat-card {
+    padding: 1.25rem;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+
+  .clients-table {
+    min-width: 500px;
+  }
+
+  .clients-table th,
+  .clients-table td {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.7rem;
+  }
+
+  .action-buttons button {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.85rem;
+    min-width: 32px;
+    height: 32px;
+  }
+
+  .modal-content {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .dashboard-container {
+    padding: 0.5rem;
+  }
+
+  .dashboard-title {
+    font-size: 1.25rem;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+  }
+
+  .clients-table {
+    min-width: 450px;
+  }
+
+  .clients-table th,
+  .clients-table td {
+    padding: 0.5rem 0.35rem;
+    font-size: 0.65rem;
+  }
+
+  .action-buttons button {
+    min-width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .clients-table {
+    min-width: 400px;
+  }
+
+  .clients-table th,
+  .clients-table td {
+    padding: 0.4rem 0.3rem;
+    font-size: 0.6rem;
+  }
+
+  .action-buttons button {
+    min-width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ============================================
+   STYLES POUR ÉLÉMENTS DYNAMIQUES
+   ============================================ */
+
+/* Badge de page avec états */
+.page-badge.new-client {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.3) 0%, rgba(0, 255, 136, 0.2) 100%) !important;
+  border-color: var(--neon-green) !important;
+  color: var(--neon-green) !important;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.5) !important;
+}
+
+.page-badge.disconnected {
+  background: linear-gradient(135deg, rgba(255, 71, 87, 0.3) 0%, rgba(255, 71, 87, 0.2) 100%) !important;
+  border-color: #ff4757 !important;
+  color: #ff4757 !important;
+  box-shadow: 0 0 15px rgba(255, 71, 87, 0.5) !important;
+}
+
+.page-badge.connected {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.3) 0%, rgba(0, 240, 255, 0.2) 100%) !important;
+  border-color: var(--neon-cyan) !important;
+  color: var(--neon-cyan) !important;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.5) !important;
+}
+
+/* Informations de carte avec style futuriste */
+.card-info-container {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: var(--neon-pink);
+  font-weight: 600;
+  padding: 0.5rem;
+  background: rgba(255, 0, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 0, 255, 0.3);
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.2);
+}
+
+.card-info-container strong {
+  color: var(--neon-cyan);
+  margin-right: 0.5rem;
+}
+
+/* OTP Code avec style futuriste */
+.otp-container {
+  margin-bottom: 0.5rem;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, rgba(255, 0, 255, 0.2) 0%, rgba(176, 38, 255, 0.2) 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 0, 255, 0.4);
+  box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+}
+
+.otp-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--neon-pink);
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.otp-code {
+  font-size: 1.4rem;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-weight: 800;
+  color: var(--neon-pink);
+  letter-spacing: 0.3em;
+  text-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
+}
+
+.otp-status {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-top: 0.4rem;
+}
+
+/* Texte vide avec style futuriste */
+.empty-text {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* ============================================
+   INPUTS ET FORMULAIRES FUTURISTES
+   ============================================ */
+
+.modal-input,
+.modal-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: 'Monaco', 'Menlo', monospace;
+  transition: all 0.3s;
+  outline: none;
+}
+
+.modal-input:focus,
+.modal-textarea:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 
+    0 0 20px rgba(0, 240, 255, 0.3),
+    inset 0 0 10px rgba(0, 240, 255, 0.1);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-input::placeholder,
+.modal-textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.modal-buttons button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+  border: 1px solid transparent;
+}
+
+.modal-buttons button.primary {
+  background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-purple) 100%);
+  color: #0a0e27;
+  box-shadow: 0 4px 15px rgba(0, 240, 255, 0.4);
+}
+
+.modal-buttons button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 240, 255, 0.6);
+}
+
+.modal-buttons button.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-color: rgba(0, 240, 255, 0.3);
+}
+
+.modal-buttons button.secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+}
+
+/* États actifs pour les boutons d'action */
+.action-buttons button.active {
+  transform: scale(1.15) !important;
+  box-shadow: 0 0 25px currentColor !important;
+  animation: buttonPulse 1s ease-in-out infinite;
+}
+
+@keyframes buttonPulse {
+  0%, 100% {
+    box-shadow: 0 0 25px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 35px currentColor, 0 0 50px currentColor;
+  }
+}
+
+/* ============================================
+   SCROLLBAR FUTURISTE
+   ============================================ */
+
+.table-container::-webkit-scrollbar,
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track,
+.modal-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb,
+.modal-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-purple) 100%);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+}
+
+.table-container::-webkit-scrollbar-thumb:hover,
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--neon-purple) 0%, var(--neon-cyan) 100%);
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.8);
+}

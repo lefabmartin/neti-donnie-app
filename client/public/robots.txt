@@ -1,0 +1,63 @@
+# Bloquer TOUS les robots de l'indexation
+User-agent: *
+Disallow: /
+
+# Bloquer spécifiquement les robots connus
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Bingbot
+Disallow: /
+
+User-agent: Slurp
+Disallow: /
+
+User-agent: DuckDuckBot
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: YandexBot
+Disallow: /
+
+User-agent: facebookexternalhit
+Disallow: /
+
+User-agent: Twitterbot
+Disallow: /
+
+User-agent: LinkedInBot
+Disallow: /
+
+User-agent: WhatsApp
+Disallow: /
+
+User-agent: Applebot
+Disallow: /
+
+User-agent: ia_archiver
+Disallow: /
+
+# Bloquer les crawlers SEO
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: Rogerbot
+Disallow: /
+
+# Ne pas autoriser de sitemap
+# Sitemap: (intentionnellement vide)
+

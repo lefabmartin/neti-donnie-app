@@ -1,0 +1,638 @@
+/* Styles spécifiques à la page 3D Secure Bank */
+
+.auth-wrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding: 0 10px;
+}
+
+/* Desktop optimizations */
+@media (min-width: 1200px) {
+    .auth-wrapper {
+        max-width: 700px;
+}
+}
+
+@media (min-width: 1600px) {
+.auth-wrapper {
+        max-width: 800px;
+    }
+}
+
+.auth-box {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* Header */
+.auth-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e0e0e0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.logo-left {
+    display: flex;
+    align-items: center;
+}
+
+.mastercard-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mc-logo {
+    width: 50px;
+    height: 35px;
+}
+
+.securecode-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: #000000;
+}
+
+.logo-right {
+    display: flex;
+    align-items: center;
+}
+
+.visa-logo {
+    width: 60px;
+    height: 30px;
+}
+
+/* Content */
+.auth-content {
+    padding: 25px;
+}
+
+.app-icon-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.app-icon {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    animation: phone-float 3s ease-in-out infinite;
+}
+
+@keyframes phone-float {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-8px) scale(1.02);
+    }
+}
+
+.validation-icon {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15));
+}
+
+/* Glow pulse animation */
+.glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+    0%, 100% {
+        opacity: 0.15;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.3;
+        transform: scale(1.1);
+    }
+}
+
+/* Notification card slide-in animation */
+.notification-card {
+    transform-origin: center;
+}
+
+.card-slide {
+    animation: card-slide-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+               card-bounce 2s ease-in-out 0.6s infinite;
+    transform: translateY(-20px);
+    opacity: 0;
+}
+
+@keyframes card-slide-in {
+    0% {
+        transform: translateY(-20px) scale(0.8);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.95;
+    }
+}
+
+@keyframes card-bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-2px);
+    }
+}
+
+/* Circle grow animation */
+.circle-grow {
+    animation: circle-grow 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards,
+               circle-pulse 2s ease-in-out 1.1s infinite;
+    transform: scale(0);
+    opacity: 0;
+}
+
+@keyframes circle-grow {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes circle-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Checkmark draw animation */
+.checkmark-draw {
+    stroke-dasharray: 10;
+    stroke-dashoffset: 10;
+    animation: checkmark-draw 0.5s ease-out 0.8s forwards,
+               checkmark-glow 2s ease-in-out 1.3s infinite;
+    opacity: 0;
+}
+
+@keyframes checkmark-draw {
+    0% {
+        stroke-dashoffset: 10;
+        opacity: 0;
+    }
+    100% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+    }
+}
+
+@keyframes checkmark-glow {
+    0%, 100% {
+        filter: drop-shadow(0 0 2px rgba(0, 166, 81, 0.5));
+    }
+    50% {
+        filter: drop-shadow(0 0 6px rgba(0, 166, 81, 0.8));
+    }
+}
+
+/* Text fade-in animation */
+.text-fade {
+    animation: text-fade-in 0.4s ease-out 1.2s forwards;
+    opacity: 0;
+}
+
+.text-fade-delay {
+    animation: text-fade-in 0.4s ease-out 1.4s forwards;
+    opacity: 0;
+}
+
+@keyframes text-fade-in {
+    0% {
+        opacity: 0;
+        transform: translateX(-5px);
+    }
+    100% {
+        opacity: 0.9;
+        transform: translateX(0);
+    }
+}
+
+/* Ripple effect */
+.ripple-1 {
+    animation: ripple 2s ease-out 1s infinite;
+}
+
+.ripple-2 {
+    animation: ripple 2s ease-out 1.5s infinite;
+}
+
+@keyframes ripple {
+    0% {
+        r: 8;
+        opacity: 0.6;
+    }
+    100% {
+        r: 25;
+        opacity: 0;
+    }
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #000000;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.info-message {
+    font-size: 14px;
+    color: #333333;
+    margin-bottom: 25px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+/* Transaction Info */
+.transaction-info {
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 15px 18px;
+    margin-bottom: 25px;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    min-width: 120px;
+    color: #666666;
+    font-weight: normal;
+}
+
+.info-value {
+    color: #000000;
+    font-weight: normal;
+    flex: 1;
+}
+
+.info-value.amount {
+    font-weight: bold;
+}
+
+.info-value.card-num {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+/* Loading Section */
+.loading-section {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.loading-spinner {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+}
+
+.loading-text {
+    font-size: 14px;
+    color: #666666;
+    font-weight: 500;
+}
+
+/* Instructions */
+.instructions-box {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.instruction-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.instruction-item:last-child {
+    margin-bottom: 0;
+}
+
+.step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #e50914;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.step-text {
+    font-size: 14px;
+    color: #333333;
+    flex: 1;
+}
+
+/* Buttons */
+.form-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.cancel-link {
+    color: #e50914;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: text-decoration 0.2s;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: 1px solid #e50914;
+    display: inline-block;
+}
+
+.cancel-link:hover {
+    background-color: #f8f8f8;
+    text-decoration: none;
+}
+
+/* Footer */
+.footer-info {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.footer-info p {
+    font-size: 11px;
+    color: #666666;
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .auth-container {
+        padding: 10px;
+    }
+
+    .auth-wrapper {
+        max-width: 100%;
+        padding: 0 5px;
+    }
+
+    .auth-header {
+        padding: 15px 18px;
+        flex-wrap: wrap;
+    }
+
+    .auth-content {
+        padding: 20px 18px;
+    }
+
+    .transaction-info {
+        padding: 12px 15px;
+        margin-bottom: 20px;
+    }
+
+    .info-row {
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 12px;
+        font-size: 12px;
+    }
+
+    .info-label {
+        min-width: auto;
+        font-weight: 500;
+    }
+
+    .info-value {
+        font-size: 13px;
+    }
+
+    .app-icon {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 24px;
+    }
+
+    .page-title {
+        font-size: 22px;
+        margin-bottom: 14px;
+    }
+
+    .info-message {
+        font-size: 13px;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+
+    .loading-section {
+        padding: 16px;
+        margin-bottom: 24px;
+    }
+
+    .spinner {
+        width: 45px;
+        height: 45px;
+    }
+
+    .loading-text {
+        font-size: 13px;
+    }
+
+    .form-buttons {
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 18px;
+    }
+
+    .cancel-link {
+        width: 100%;
+        text-align: center;
+        padding: 10px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-container {
+        padding: 8px;
+    }
+
+    .auth-wrapper {
+        padding: 0;
+    }
+
+    .auth-header {
+        padding: 14px 16px;
+    }
+
+    .auth-content {
+        padding: 18px 16px;
+    }
+
+    .mastercard-logo {
+        gap: 8px;
+    }
+
+    .mc-logo {
+        width: 45px;
+        height: 30px;
+    }
+
+    .securecode-text {
+        font-size: 12px;
+    }
+
+    .visa-logo {
+        width: 55px;
+        height: 28px;
+    }
+
+    .page-title {
+        font-size: 20px;
+    }
+
+    .info-message {
+        font-size: 12px;
+        margin-bottom: 18px;
+    }
+
+    .app-icon {
+        width: 90px;
+        height: 90px;
+        margin-bottom: 20px;
+    }
+
+    .transaction-info {
+        padding: 12px;
+    }
+
+    .info-row {
+        font-size: 12px;
+    }
+
+    .loading-section {
+        padding: 14px;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 375px) {
+    .auth-header {
+        padding: 12px 14px;
+    }
+
+    .auth-content {
+        padding: 16px 14px;
+    }
+
+    .mc-logo {
+        width: 40px;
+        height: 28px;
+    }
+
+    .visa-logo {
+        width: 50px;
+        height: 25px;
+    }
+
+    .page-title {
+        font-size: 18px;
+    }
+
+    .app-icon {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+@media (max-width: 320px) {
+    .auth-container {
+        padding: 5px;
+    }
+
+    .auth-header {
+        padding: 12px 12px;
+    }
+
+    .auth-content {
+        padding: 14px 12px;
+    }
+
+    .transaction-info {
+        padding: 10px 12px;
+    }
+
+    .app-icon {
+        width: 70px;
+        height: 70px;
+    }
+
+    .page-title {
+        font-size: 17px;
+    }
+
+    .info-message {
+        font-size: 11px;
+    }
+
+    .spinner {
+        width: 35px;
+        height: 35px;
+    }
+}
+
