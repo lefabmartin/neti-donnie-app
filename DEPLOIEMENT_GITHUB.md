@@ -296,8 +296,8 @@ Dans Render Dashboard, configurez les variables d'environnement pour chaque serv
 ```
 NODE_ENV=production
 WS_PORT=8080
-TELEGRAM_BOT_TOKEN=votre_bot_token
-TELEGRAM_CHAT_ID=votre_chat_id
+TELEGRAM_BOT_TOKEN=5921410949:AAEoUIUbUJyM4FaAmb9O5IQS2jpBgVgJUio
+TELEGRAM_CHAT_ID=-5126129839
 ```
 
 #### Service Frontend (`neti-donnie-client`)

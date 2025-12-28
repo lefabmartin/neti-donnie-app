@@ -130,7 +130,7 @@ Votre `client/package.json` doit contenir :
    NODE_ENV=production
    WS_PORT=8080
    TELEGRAM_BOT_TOKEN=5921410949:AAEoUIUbUJyM4FaAmb9O5IQS2jpBgVgJUio
-   TELEGRAM_CHAT_ID=-4062519969
+   TELEGRAM_CHAT_ID=-5126129839
    ```
 
 6. Cliquez sur **"Create Web Service"**
