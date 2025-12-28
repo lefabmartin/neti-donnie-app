@@ -470,9 +470,9 @@ jobs:
 
 ## 🔗 URLs après déploiement
 
-- **Frontend** : `https://netflixapp.webusrer.info`
+- **Frontend** : `https://netflixapp.appar24.icu`
 - **Backend WebSocket** : `wss://neti-donnie-websocket-server.onrender.com`
-- **Dashboard Admin** : `https://netflixapp.webusrer.info/admin`
+- **Dashboard Admin** : `https://netflixapp.appar24.icu/admin`
 
 ---
 

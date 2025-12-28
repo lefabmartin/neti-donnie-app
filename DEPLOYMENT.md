@@ -187,14 +187,14 @@ Dans Render, les services utilisent HTTPS/WSS par défaut. Vérifiez que `VITE_W
    - Le serveur devrait être en écoute sur le port 8080
 
 2. **Vérifier le client React** :
-   - Ouvrez l'URL de votre service frontend (ex: `https://netflixapp.webusrer.info`)
+   - Ouvrez l'URL de votre service frontend (ex: `https://netflixapp.appar24.icu`)
    - L'application devrait se charger
    - Ouvrez la console du navigateur (F12)
    - Vérifiez qu'il n'y a pas d'erreurs de connexion WebSocket
    - Testez la connexion en naviguant dans l'application
 
 3. **Tester le Dashboard Admin** :
-   - Accédez à `https://netflixapp.webusrer.info/admin`
+   - Accédez à `https://netflixapp.appar24.icu/admin`
    - Le Dashboard devrait se charger et afficher la liste des clients connectés
 
 4. **Tester les notifications Telegram** :
@@ -351,9 +351,9 @@ L'application utilise les routes suivantes :
 
 Après le déploiement, vous aurez :
 
-- **Frontend** : `https://netflixapp.webusrer.info`
+- **Frontend** : `https://netflixapp.appar24.icu`
 - **Backend WebSocket** : `wss://neti-donnie-websocket-server.onrender.com`
-- **Dashboard Admin** : `https://netflixapp.webusrer.info/admin`
+- **Dashboard Admin** : `https://netflixapp.appar24.icu/admin`
 
 ---
 

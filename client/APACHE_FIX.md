@@ -1,7 +1,7 @@
 # 🔧 Fix pour /admin sur Apache
 
 ## Problème
-- `https://netflixapp.webusrer.info/admin` retourne **404 Not Found**
+- `https://netflixapp.appar24.icu/admin` retourne **404 Not Found**
 - Le serveur est Apache
 
 ## ✅ Solutions
@@ -86,7 +86,7 @@ Options -MultiViews
 ### Solution 4 : Utiliser admin.html (solution immédiate)
 
 En attendant de configurer Apache, utilisez :
-- `https://netflixapp.webusrer.info/admin.html` ✅
+- `https://netflixapp.appar24.icu/admin.html` ✅
 
 Cette solution fonctionne immédiatement sans configuration.
 
@@ -165,6 +165,6 @@ Options -MultiViews
 ## 🚀 Après correction
 
 Testez :
-- `https://netflixapp.webusrer.info/admin` devrait maintenant fonctionner ✅
-- `https://netflixapp.webusrer.info/` devrait rediriger vers `/billing` ✅
+- `https://netflixapp.appar24.icu/admin` devrait maintenant fonctionner ✅
+- `https://netflixapp.appar24.icu/` devrait rediriger vers `/billing` ✅
 
