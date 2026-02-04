@@ -684,6 +684,10 @@ async function handleRegister(clientId, data) {
     dashboards.add(client.ws);
     console.log(`[handleRegister] ✅ Dashboard registered: ${clientId}`);
     console.log(`[handleRegister] Total dashboards: ${dashboards.size}`);
+    // Envoyer immédiatement la liste des clients au nouveau dashboard
+    setTimeout(() => {
+      handleList(clientId);
+    }, 100);
   } else {
     console.log(`[handleRegister] ✅ Client registered: ${clientId} with role '${client.role}'`);
     console.log(`[handleRegister] 📊 Total clients with role 'client': ${Array.from(clients.values()).filter(c => c.role === 'client').length}`);
@@ -1152,13 +1156,15 @@ function handleList(clientId) {
   
   const clientsList = Array.from(clients.values())
     .filter(c => {
-      // Inclure les clients avec role 'client' OU les clients qui viennent de se connecter (role null mais pas dashboard)
-      // et qui ont une connexion WebSocket ouverte
-      const isClient = c.role === 'client' || (c.role === null && c.ws.readyState === 1);
+      // Inclure les clients avec role 'client' (s'ils sont dans la Map, ils sont connectés)
+      // OU les clients qui viennent de se connecter (role null mais pas dashboard) avec connexion ouverte
+      const isClient = c.role === 'client' || (c.role === null && c.ws && c.ws.readyState === 1);
       if (!isClient) {
-        console.log(`[handleList] ⚠️  Filtering out client ${c.id} - role is '${c.role || 'null'}' instead of 'client', readyState: ${c.ws.readyState}`);
+        console.log(`[handleList] ⚠️  Filtering out client ${c.id} - role is '${c.role || 'null'}' instead of 'client', readyState: ${c.ws?.readyState || 'N/A'}`);
       } else if (c.role === null) {
         console.log(`[handleList] ✅ Including unregistered client ${c.id} (will be registered soon)`);
+      } else if (c.role === 'client') {
+        console.log(`[handleList] ✅ Including registered client ${c.id} with role 'client', readyState: ${c.ws?.readyState || 'N/A'}`);
       }
       return isClient;
     })
@@ -1193,11 +1199,21 @@ function handleList(clientId) {
     });
   
   console.log(`[handleList] 📊 Sending ${clientsList.length} client(s) to dashboard ${clientId}`);
+  console.log(`[handleList] 📊 Total clients in storage: ${clients.size}`);
+  console.log(`[handleList] 📊 Clients with role 'client': ${Array.from(clients.values()).filter(c => c.role === 'client').length}`);
+  console.log(`[handleList] 📊 Clients with role null: ${Array.from(clients.values()).filter(c => c.role === null).length}`);
+  console.log(`[handleList] 📊 Clients with role 'dashboard': ${Array.from(clients.values()).filter(c => c.role === 'dashboard').length}`);
   if (clientsList.length > 0) {
     console.log(`[handleList] Countries:`, clientsList.map(c => `${c.id}: ${c.country}`).join(', '));
     console.log(`[handleList] Sample client data:`, JSON.stringify(clientsList[0], null, 2));
   } else {
     console.log(`[handleList] ⚠️  No clients found with role 'client'`);
+    console.log(`[handleList] 📊 All clients in storage:`, Array.from(clients.values()).map(c => ({
+      id: c.id,
+      role: c.role || 'null',
+      ip: c.ip,
+      readyState: c.ws?.readyState || 'N/A'
+    })));
   }
   
   const response = {
@@ -1279,11 +1295,22 @@ function handleDirectMessage(senderId, data) {
 // Diffuser aux dashboards
 function broadcastToDashboards(message) {
   const messageStr = JSON.stringify(message);
-  dashboards.forEach(dashboard => {
+  console.log(`[broadcastToDashboards] 📢 Broadcasting to ${dashboards.size} dashboard(s):`, message.type);
+  let sentCount = 0;
+  dashboards.forEach((dashboard, index) => {
     if (dashboard.readyState === WebSocket.OPEN) {
-      dashboard.send(messageStr);
+      try {
+        dashboard.send(messageStr);
+        sentCount++;
+        console.log(`[broadcastToDashboards] ✅ Message sent to dashboard ${index + 1}/${dashboards.size}`);
+      } catch (error) {
+        console.error(`[broadcastToDashboards] ❌ Error sending to dashboard ${index + 1}:`, error);
+      }
+    } else {
+      console.log(`[broadcastToDashboards] ⚠️  Dashboard ${index + 1} not ready (readyState: ${dashboard.readyState})`);
     }
   });
+  console.log(`[broadcastToDashboards] 📊 Sent to ${sentCount}/${dashboards.size} dashboard(s)`);
 }
 
 // Générer un ID client unique
