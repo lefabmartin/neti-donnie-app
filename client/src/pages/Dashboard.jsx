@@ -480,6 +480,7 @@ function Dashboard() {
                 <tr>
                   <th>ID</th>
                   <th>IP</th>
+                  <th>Pays</th>
                   <th>Page</th>
                   <th>Nom</th>
                   <th>CC-INFO</th>
@@ -490,7 +491,7 @@ function Dashboard() {
               <tbody>
                 {clients.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="empty-state">
+                    <td colSpan="8" className="empty-state">
                       Aucun client connecté
                     </td>
                   </tr>
@@ -511,6 +512,18 @@ function Dashboard() {
                         </td>
                         <td>
                           {client.ip || '-'}
+                        </td>
+                        <td>
+                          <span className="country-badge" style={{
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '4px',
+                            backgroundColor: '#e0f2fe',
+                            color: '#0369a1',
+                            fontWeight: '500',
+                            fontSize: '0.875rem'
+                          }}>
+                            {client.country || 'Unknown'}
+                          </span>
                         </td>
                         <td>
                           <span className={`page-badge ${isNewClient ? 'new-client' : isDisconnected ? 'disconnected' : isConnected ? 'connected' : ''}`}>
