@@ -236,42 +236,8 @@ function Dashboard() {
       
       // Connect if not already connected
       if (!ws.isConnected) {
-        // En production, utiliser toujours window.CONFIG.WS_URL ou une URL par défaut
-        // Ne jamais utiliser localhost en production
-        // CORRIGER automatiquement l'ancienne URL si détectée
-        const getWebSocketUrl = () => {
-          let url = null;
-          
-          if (window.CONFIG?.WS_URL) {
-            url = window.CONFIG.WS_URL;
-            // CORRIGER l'ancienne URL automatiquement
-            if (url === 'wss://neti-websocket-server.onrender.com') {
-              console.warn('[Dashboard] ⚠️  Old WebSocket URL detected, correcting to new URL');
-              url = 'wss://neti-donnie-websocket-server.onrender.com';
-              // Mettre à jour window.CONFIG pour éviter de re-vérifier
-              window.CONFIG.WS_URL = url;
-            }
-            return url;
-          }
-          
-          if (import.meta.env.VITE_WS_URL) {
-            url = import.meta.env.VITE_WS_URL;
-            // CORRIGER l'ancienne URL automatiquement
-            if (url === 'wss://neti-websocket-server.onrender.com') {
-              console.warn('[Dashboard] ⚠️  Old WebSocket URL detected in env, correcting to new URL');
-              url = 'wss://neti-donnie-websocket-server.onrender.com';
-            }
-            return url;
-          }
-          
-          // En production, utiliser l'URL par défaut, pas localhost
-          if (window.location.protocol === 'https:') {
-            return 'wss://neti-donnie-websocket-server.onrender.com';
-          }
-          // Seulement en développement local
-          return 'ws://localhost:8080';
-        };
-        const url = getWebSocketUrl();
+        const url = window.CONFIG?.WS_URL || import.meta.env.VITE_WS_URL ||
+          (window.location.protocol === 'https:' ? 'wss://neti-websocket-server.onrender.com' : 'ws://localhost:8080');
         console.log('[Dashboard] Not connected, connecting to WebSocket:', url);
         ws.connect(url);
       } else {

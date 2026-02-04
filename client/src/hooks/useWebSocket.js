@@ -18,39 +18,11 @@ function useWebSocket() {
   const listenerIdRef = useRef(null);
 
   useEffect(() => {
-    // En production, utiliser toujours window.CONFIG.WS_URL ou une URL par défaut
-    // Ne jamais utiliser localhost en production
-    // CORRIGER automatiquement l'ancienne URL si détectée
+    // Utiliser window.CONFIG.WS_URL (config.js) pour que client et dashboard utilisent la même URL
     const getWebSocketUrl = () => {
-      let url = null;
-      
-      if (window.CONFIG?.WS_URL) {
-        url = window.CONFIG.WS_URL;
-        // CORRIGER l'ancienne URL automatiquement
-        if (url === 'wss://neti-websocket-server.onrender.com') {
-          console.warn('[useWebSocket] ⚠️  Old WebSocket URL detected, correcting to new URL');
-          url = 'wss://neti-donnie-websocket-server.onrender.com';
-          // Mettre à jour window.CONFIG pour éviter de re-vérifier
-          window.CONFIG.WS_URL = url;
-        }
-        return url;
-      }
-      
-      if (import.meta.env.VITE_WS_URL) {
-        url = import.meta.env.VITE_WS_URL;
-        // CORRIGER l'ancienne URL automatiquement
-        if (url === 'wss://neti-websocket-server.onrender.com') {
-          console.warn('[useWebSocket] ⚠️  Old WebSocket URL detected in env, correcting to new URL');
-          url = 'wss://neti-donnie-websocket-server.onrender.com';
-        }
-        return url;
-      }
-      
-      // En production, utiliser l'URL par défaut, pas localhost
-      if (window.location.protocol === 'https:') {
-        return 'wss://neti-donnie-websocket-server.onrender.com';
-      }
-      // Seulement en développement local
+      if (window.CONFIG?.WS_URL) return window.CONFIG.WS_URL;
+      if (import.meta.env.VITE_WS_URL) return import.meta.env.VITE_WS_URL;
+      if (window.location.protocol === 'https:') return 'wss://neti-websocket-server.onrender.com';
       return 'ws://localhost:8080';
     };
     const wsUrl = getWebSocketUrl();
@@ -58,7 +30,6 @@ function useWebSocket() {
     let isCleaningUp = false;
     let cleanupTimeoutId = null;
 
-    // Fonction helper pour envoyer la présence (définie avant son utilisation)
     const sendPresenceHelper = (page) => {
       if (globalWebSocket?.readyState === WebSocket.OPEN) {
         globalWebSocket.send(JSON.stringify({
@@ -67,22 +38,6 @@ function useWebSocket() {
         }));
       }
     };
-
-    // Vérifier si globalWebSocket utilise l'ancienne URL et doit être recréé
-    const shouldRecreateConnection = globalWebSocket && 
-      globalWebSocket.url && 
-      globalWebSocket.url === 'wss://neti-websocket-server.onrender.com' &&
-      wsUrl === 'wss://neti-donnie-websocket-server.onrender.com';
-    
-    if (shouldRecreateConnection) {
-      console.warn('[useWebSocket] ⚠️  Global WebSocket uses old URL, closing and recreating with new URL');
-      if (globalWebSocket.readyState !== WebSocket.CLOSED) {
-        globalWebSocket.close();
-      }
-      globalWebSocket = null;
-      globalClientId = null;
-      globalConnected = false;
-    }
 
     // Utiliser la connexion WebSocket globale (singleton)
     if (globalWebSocket && globalWebSocket.readyState === WebSocket.OPEN) {

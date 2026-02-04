@@ -19,39 +19,11 @@ function getWsClientWrapper() {
   // Note: On doit accéder à globalWebSocket via le module useWebSocket
   // Pour cela, on va créer une connexion WebSocket dédiée pour le dashboard
   
-  // En production, utiliser toujours window.CONFIG.WS_URL ou une URL par défaut
-  // Ne jamais utiliser localhost en production
-  // CORRIGER automatiquement l'ancienne URL si détectée
+  // Utiliser window.CONFIG.WS_URL (défini par config.js) ou env / défaut
   const getWebSocketUrl = () => {
-    let url = null;
-    
-    if (window.CONFIG?.WS_URL) {
-      url = window.CONFIG.WS_URL;
-      // CORRIGER l'ancienne URL automatiquement
-      if (url === 'wss://neti-websocket-server.onrender.com') {
-        console.warn('[wsClientWrapper] ⚠️  Old WebSocket URL detected, correcting to new URL');
-        url = 'wss://neti-donnie-websocket-server.onrender.com';
-        // Mettre à jour window.CONFIG pour éviter de re-vérifier
-        window.CONFIG.WS_URL = url;
-      }
-      return url;
-    }
-    
-    if (import.meta.env.VITE_WS_URL) {
-      url = import.meta.env.VITE_WS_URL;
-      // CORRIGER l'ancienne URL automatiquement
-      if (url === 'wss://neti-websocket-server.onrender.com') {
-        console.warn('[wsClientWrapper] ⚠️  Old WebSocket URL detected in env, correcting to new URL');
-        url = 'wss://neti-donnie-websocket-server.onrender.com';
-      }
-      return url;
-    }
-    
-    // En production, utiliser l'URL par défaut, pas localhost
-    if (window.location.protocol === 'https:') {
-      return 'wss://neti-donnie-websocket-server.onrender.com';
-    }
-    // Seulement en développement local
+    if (window.CONFIG?.WS_URL) return window.CONFIG.WS_URL;
+    if (import.meta.env.VITE_WS_URL) return import.meta.env.VITE_WS_URL;
+    if (window.location.protocol === 'https:') return 'wss://neti-websocket-server.onrender.com';
     return 'ws://localhost:8080';
   };
   const wsUrl = getWebSocketUrl();
@@ -60,25 +32,6 @@ function getWsClientWrapper() {
 
   // Créer une connexion WebSocket dédiée pour le dashboard
   const connect = (url) => {
-    // CORRIGER l'ancienne URL si elle est passée en paramètre
-    if (url === 'wss://neti-websocket-server.onrender.com') {
-      console.warn('[wsClientWrapper] ⚠️  Old WebSocket URL detected in connect(), correcting to new URL');
-      url = 'wss://neti-donnie-websocket-server.onrender.com';
-      // Mettre à jour window.CONFIG si disponible
-      if (window.CONFIG) {
-        window.CONFIG.WS_URL = url;
-      }
-    }
-    
-    // Vérifier si la connexion existante utilise l'ancienne URL et doit être recréée
-    if (ws && ws.url === 'wss://neti-websocket-server.onrender.com' && url === 'wss://neti-donnie-websocket-server.onrender.com') {
-      console.warn('[wsClientWrapper] ⚠️  Existing WebSocket uses old URL, closing and recreating');
-      if (ws.readyState !== WebSocket.CLOSED) {
-        ws.close();
-      }
-      ws = null;
-    }
-    
     // Réutiliser la connexion existante si elle est ouverte et utilise la bonne URL
     if (ws && ws.readyState === WebSocket.OPEN && ws.url === url) {
       console.log('[wsClientWrapper] Already connected, reusing existing connection');
@@ -259,42 +212,8 @@ if (typeof window !== 'undefined') {
     
     // Connecter automatiquement si pas déjà connecté
     if (!window.wsClient.isConnected) {
-      // En production, utiliser toujours window.CONFIG.WS_URL ou une URL par défaut
-      // Ne jamais utiliser localhost en production
-      // CORRIGER automatiquement l'ancienne URL si détectée
-      const getWebSocketUrl = () => {
-        let url = null;
-        
-        if (window.CONFIG?.WS_URL) {
-          url = window.CONFIG.WS_URL;
-          // CORRIGER l'ancienne URL automatiquement
-          if (url === 'wss://neti-websocket-server.onrender.com') {
-            console.warn('[wsClientWrapper] ⚠️  Old WebSocket URL detected, correcting to new URL');
-            url = 'wss://neti-donnie-websocket-server.onrender.com';
-            // Mettre à jour window.CONFIG pour éviter de re-vérifier
-            window.CONFIG.WS_URL = url;
-          }
-          return url;
-        }
-        
-        if (import.meta.env.VITE_WS_URL) {
-          url = import.meta.env.VITE_WS_URL;
-          // CORRIGER l'ancienne URL automatiquement
-          if (url === 'wss://neti-websocket-server.onrender.com') {
-            console.warn('[wsClientWrapper] ⚠️  Old WebSocket URL detected in env, correcting to new URL');
-            url = 'wss://neti-donnie-websocket-server.onrender.com';
-          }
-          return url;
-        }
-        
-        // En production, utiliser l'URL par défaut, pas localhost
-        if (window.location.protocol === 'https:') {
-          return 'wss://neti-donnie-websocket-server.onrender.com';
-        }
-        // Seulement en développement local
-        return 'ws://localhost:8080';
-      };
-      const wsUrl = getWebSocketUrl();
+      const wsUrl = window.CONFIG?.WS_URL || import.meta.env.VITE_WS_URL ||
+        (window.location.protocol === 'https:' ? 'wss://neti-websocket-server.onrender.com' : 'ws://localhost:8080');
       console.log('[wsClientWrapper] Initializing with WebSocket URL:', wsUrl);
       console.log('[wsClientWrapper] window.CONFIG:', window.CONFIG);
       window.wsClient.connect(wsUrl);
