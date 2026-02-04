@@ -738,8 +738,11 @@ async function handleRegister(clientId, data) {
     
     if (timeSinceLastNotification < MIN_NOTIFICATION_INTERVAL && lastNotificationTime > 0) {
       console.log(`[handleRegister] ⚠️  Notification skipped - too soon since last notification (${Math.round(timeSinceLastNotification/1000)}s ago) for IP ${client.ip}`);
-      return; // Ne pas envoyer de notification si on vient d'en envoyer une récemment
-    }
+      // Ne pas envoyer de notification Telegram, mais continuer pour notifier les dashboards
+      // Marquer quand même comme envoyé pour éviter les tentatives répétées
+      client.notificationSent = true;
+      client.lastNotificationTime = now;
+    } else {
     
     // Marquer IMMÉDIATEMENT que la notification va être envoyée pour éviter les doublons
     // même si plusieurs appels à handleRegister arrivent en même temps
