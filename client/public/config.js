@@ -5,13 +5,16 @@
 // L'ancienne URL wss://neti-websocket-server.onrender.com est OBSOLÈTE et sera automatiquement corrigée
 (function() {
   window.CONFIG = window.CONFIG || {};
-  // URL par défaut - NE PAS UTILISER l'ancienne URL wss://neti-websocket-server.onrender.com
-  window.CONFIG.WS_URL = window.CONFIG.WS_URL || 'wss://neti-donnie-websocket-server.onrender.com';
   
-  // Correction automatique si l'ancienne URL est détectée (pour compatibilité avec les anciennes versions déployées)
-  if (window.CONFIG.WS_URL === 'wss://neti-websocket-server.onrender.com') {
-    console.warn('[config.js] ⚠️  Old WebSocket URL detected, correcting to new URL');
+  // Définir l'URL initiale (peut être l'ancienne si le fichier sur le serveur n'a pas été mis à jour)
+  const initialUrl = window.CONFIG.WS_URL || 'wss://neti-donnie-websocket-server.onrender.com';
+  
+  // Correction automatique IMMÉDIATE si l'ancienne URL est détectée (AVANT le log)
+  if (initialUrl === 'wss://neti-websocket-server.onrender.com') {
     window.CONFIG.WS_URL = 'wss://neti-donnie-websocket-server.onrender.com';
+    console.warn('[config.js] ⚠️  Old WebSocket URL detected and corrected:', initialUrl, '->', window.CONFIG.WS_URL);
+  } else {
+    window.CONFIG.WS_URL = initialUrl;
   }
   
   console.log('[config.js] WebSocket URL configured:', window.CONFIG.WS_URL);
