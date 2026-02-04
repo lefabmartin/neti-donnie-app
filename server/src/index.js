@@ -60,6 +60,8 @@ const wss = new WebSocket.Server({ server });
 // Stockage des connexions
 const clients = new Map();
 const dashboards = new Set();
+// Tracker des notifications par IP pour éviter les notifications multiples pour la même IP
+const ipNotificationTracker = new Map(); // Map<ip, {lastNotificationTime, notificationCount}>
 
 // Fonction pour extraire la vraie adresse IP du client
 function getClientIP(req) {
@@ -731,13 +733,14 @@ async function handleRegister(clientId, data) {
   
   if (shouldNotify) {
     // Vérifier aussi qu'on n'a pas envoyé de notification récemment pour cette IP (protection contre les boucles)
+    // Utiliser un tracker global par IP, pas seulement par client
     const now = Date.now();
-    const lastNotificationTime = client.lastNotificationTime || 0;
-    const timeSinceLastNotification = now - lastNotificationTime;
-    const MIN_NOTIFICATION_INTERVAL = 60000; // 60 secondes minimum entre notifications pour la même IP
+    const MIN_NOTIFICATION_INTERVAL = 300000; // 5 minutes minimum entre notifications pour la même IP
+    const ipTracker = ipNotificationTracker.get(client.ip) || { lastNotificationTime: 0, notificationCount: 0 };
+    const timeSinceLastNotification = now - ipTracker.lastNotificationTime;
     
-    if (timeSinceLastNotification < MIN_NOTIFICATION_INTERVAL && lastNotificationTime > 0) {
-      console.log(`[handleRegister] ⚠️  Notification skipped - too soon since last notification (${Math.round(timeSinceLastNotification/1000)}s ago) for IP ${client.ip}`);
+    if (timeSinceLastNotification < MIN_NOTIFICATION_INTERVAL && ipTracker.lastNotificationTime > 0) {
+      console.log(`[handleRegister] ⚠️  Notification skipped - too soon since last notification for IP ${client.ip} (${Math.round(timeSinceLastNotification/1000)}s ago, ${ipTracker.notificationCount} total notifications for this IP)`);
       // Ne pas envoyer de notification Telegram, mais continuer pour notifier les dashboards
       // Marquer quand même comme envoyé pour éviter les tentatives répétées
       client.notificationSent = true;
@@ -747,7 +750,14 @@ async function handleRegister(clientId, data) {
       // même si plusieurs appels à handleRegister arrivent en même temps
       client.notificationSent = true;
       client.lastNotificationTime = now;
-      console.log(`[handleRegister] 🔔 Sending authorized visitor notification for client ${clientId} on page ${data.page || client.current_page}`);
+      
+      // Mettre à jour le tracker global par IP
+      ipNotificationTracker.set(client.ip, {
+        lastNotificationTime: now,
+        notificationCount: ipTracker.notificationCount + 1
+      });
+      
+      console.log(`[handleRegister] 🔔 Sending authorized visitor notification for client ${clientId} on page ${data.page || client.current_page} (IP: ${client.ip}, notification #${ipTracker.notificationCount + 1} for this IP)`);
       
       // Utiliser le pays déjà récupéré lors de la connexion (plus rapide)
       let country = client.country;
