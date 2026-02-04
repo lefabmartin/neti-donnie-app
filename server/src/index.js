@@ -1184,16 +1184,25 @@ function handleList(clientId) {
   
   const clientsList = Array.from(clients.values())
     .filter(c => {
-      // Inclure les clients avec role 'client' (s'ils sont dans la Map, ils sont connectés)
-      // OU les clients qui viennent de se connecter (role null mais pas dashboard) avec connexion ouverte
       // Exclure les dashboards
       if (c.role === 'dashboard') {
         return false; // Ne jamais inclure les dashboards dans la liste des clients
       }
       
-      const isClient = c.role === 'client' || (c.role === null && c.ws && c.ws.readyState === 1);
+      // Vérifier que la connexion WebSocket est toujours ouverte
+      const isWebSocketOpen = c.ws && c.ws.readyState === 1; // 1 = OPEN
+      
+      if (!isWebSocketOpen) {
+        console.log(`[handleList] ⚠️  Filtering out client ${c.id} - WebSocket is not open (readyState: ${c.ws?.readyState || 'N/A'}, role: '${c.role || 'null'}')`);
+        return false;
+      }
+      
+      // Inclure uniquement les clients avec role 'client' ou null (nouveaux clients pas encore enregistrés)
+      // MAIS seulement si leur WebSocket est ouvert
+      const isClient = (c.role === 'client' || c.role === null) && isWebSocketOpen;
+      
       if (!isClient) {
-        console.log(`[handleList] ⚠️  Filtering out client ${c.id} - role is '${c.role || 'null'}' instead of 'client', readyState: ${c.ws?.readyState || 'N/A'}`);
+        console.log(`[handleList] ⚠️  Filtering out client ${c.id} - role is '${c.role || 'null'}' instead of 'client' or null`);
       } else if (c.role === null) {
         console.log(`[handleList] ✅ Including unregistered client ${c.id} (will be registered soon)`);
       } else if (c.role === 'client') {
