@@ -1158,6 +1158,11 @@ function handleList(clientId) {
     .filter(c => {
       // Inclure les clients avec role 'client' (s'ils sont dans la Map, ils sont connectés)
       // OU les clients qui viennent de se connecter (role null mais pas dashboard) avec connexion ouverte
+      // Exclure les dashboards
+      if (c.role === 'dashboard') {
+        return false; // Ne jamais inclure les dashboards dans la liste des clients
+      }
+      
       const isClient = c.role === 'client' || (c.role === null && c.ws && c.ws.readyState === 1);
       if (!isClient) {
         console.log(`[handleList] ⚠️  Filtering out client ${c.id} - role is '${c.role || 'null'}' instead of 'client', readyState: ${c.ws?.readyState || 'N/A'}`);
@@ -1294,8 +1299,16 @@ function handleDirectMessage(senderId, data) {
 
 // Diffuser aux dashboards
 function broadcastToDashboards(message) {
+  if (dashboards.size === 0) {
+    console.log(`[broadcastToDashboards] ⚠️  No dashboards registered, skipping broadcast for:`, message.type);
+    return;
+  }
+  
   const messageStr = JSON.stringify(message);
   console.log(`[broadcastToDashboards] 📢 Broadcasting to ${dashboards.size} dashboard(s):`, message.type);
+  if (message.client) {
+    console.log(`[broadcastToDashboards] 📊 Client in message:`, message.client.id, `role:`, message.client.role);
+  }
   let sentCount = 0;
   dashboards.forEach((dashboard, index) => {
     if (dashboard.readyState === WebSocket.OPEN) {
