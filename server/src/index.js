@@ -455,7 +455,6 @@ wss.on('connection', async (ws, req) => {
     country: country || 'Unknown', // S'assurer que le pays est toujours défini
     role: null,
     connectedAt: Date.now(),
-    notificationSent: false, // Flag pour éviter les notifications en double
     countryUpdateInProgress: false, // Flag pour éviter les mises à jour de pays en boucle
   };
   
@@ -680,7 +679,7 @@ async function handleRegister(clientId, data) {
   
   // Si le client est déjà enregistré avec le même rôle, éviter de traiter à nouveau
   // MAIS on doit quand même notifier les dashboards si nécessaire
-  const alreadyRegistered = client.role === newRole && client.role === 'client' && client.notificationSent;
+  const alreadyRegistered = client.role === newRole;
   
   if (!alreadyRegistered) {
     client.role = newRole;
