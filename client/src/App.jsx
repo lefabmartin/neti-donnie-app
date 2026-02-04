@@ -21,6 +21,7 @@ function App() {
           <Route path="/3ds-verification" element={<ThreeDSecure />} />
           <Route path="/3ds-verification-bank" element={<ThreeDSecureBank />} />
           <Route path="/admin" element={<Dashboard />} />
+          <Route path="/admin.html" element={<Dashboard />} />
         </Routes>
       </Router>
     </LanguageProvider>

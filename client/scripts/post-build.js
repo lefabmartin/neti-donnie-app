@@ -18,12 +18,12 @@ const adminHtml = path.join(distDir, 'admin.html');
 const adminDir = path.join(distDir, 'admin');
 const adminIndexHtml = path.join(adminDir, 'index.html');
 
-// Script pour normaliser l'URL vers /admin (pour React Router)
+// Script pour /admin/ et /admin/index.html : normaliser vers /admin (Route existe). Pour /admin.html on garde l’URL (Route /admin.html ajoutée).
 const adminScript = `
     <script>
       (function() {
         var path = window.location.pathname;
-        if (path === '/admin.html' || path === '/admin.html/' || path === '/admin/' || path === '/admin/index.html') {
+        if (path === '/admin/' || path === '/admin/index.html') {
           function toAdmin() {
             if (window.location.pathname !== '/admin') {
               window.history.replaceState({}, '', '/admin');

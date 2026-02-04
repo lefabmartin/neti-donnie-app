@@ -1,3 +1,8 @@
+# Redirection /admin et /admin/ vers /admin.html (fonctionne même si mod_rewrite est désactivé)
+<IfModule mod_alias.c>
+  RedirectMatch 302 ^/admin/?$ /admin.html
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
