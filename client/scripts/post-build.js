@@ -15,48 +15,42 @@ const __dirname = path.dirname(__filename);
 const distDir = path.join(__dirname, '..', 'dist');
 const indexHtml = path.join(distDir, 'index.html');
 const adminHtml = path.join(distDir, 'admin.html');
+const adminDir = path.join(distDir, 'admin');
+const adminIndexHtml = path.join(adminDir, 'index.html');
+
+// Script pour normaliser l'URL vers /admin (pour React Router)
+const adminScript = `
+    <script>
+      (function() {
+        var path = window.location.pathname;
+        if (path === '/admin.html' || path === '/admin.html/' || path === '/admin/' || path === '/admin/index.html') {
+          function toAdmin() {
+            if (window.location.pathname !== '/admin') {
+              window.history.replaceState({}, '', '/admin');
+              window.dispatchEvent(new PopStateEvent('popstate', { state: {} }));
+            }
+          }
+          toAdmin();
+          if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', toAdmin);
+          setTimeout(toAdmin, 100);
+        }
+      })();
+    </script>
+`;
 
 try {
   if (fs.existsSync(indexHtml)) {
     let content = fs.readFileSync(indexHtml, 'utf8');
-    
-    // Ajouter un script pour forcer la navigation vers /admin si on est sur /admin.html
-    const adminScript = `
-    <script>
-      // Forcer la navigation vers /admin après le chargement de React Router
-      (function() {
-        const currentPath = window.location.pathname;
-        if (currentPath === '/admin.html' || currentPath === '/admin.html/') {
-          // Attendre que React Router soit chargé, puis naviguer vers /admin
-          function navigateToAdmin() {
-            if (window.location.pathname !== '/admin') {
-              window.history.replaceState({}, '', '/admin');
-              // Déclencher un événement popstate pour que React Router détecte le changement
-              window.dispatchEvent(new PopStateEvent('popstate', { state: {} }));
-            }
-          }
-          
-          // Essayer immédiatement
-          navigateToAdmin();
-          
-          // Réessayer après le chargement du DOM
-          if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', navigateToAdmin);
-          }
-          
-          // Réessayer après un court délai pour laisser React Router s'initialiser
-          setTimeout(navigateToAdmin, 100);
-        }
-      })();
-    </script>
-    `;
-    
-    // Insérer le script avant la fermeture de </body>
-    content = content.replace('</body>', adminScript + '</body>');
-    
-    // Créer admin.html à la racine pour gérer /admin
-    fs.writeFileSync(adminHtml, content, 'utf8');
+    const contentWithScript = content.replace('</body>', adminScript + '</body>');
+
+    // admin.html à la racine (pour les liens directs admin.html)
+    fs.writeFileSync(adminHtml, contentWithScript, 'utf8');
     console.log('✅ admin.html créé avec succès');
+
+    // admin/index.html pour que /admin et /admin/ fonctionnent sur les hébergeurs qui servent les dossiers
+    if (!fs.existsSync(adminDir)) fs.mkdirSync(adminDir, { recursive: true });
+    fs.writeFileSync(adminIndexHtml, contentWithScript, 'utf8');
+    console.log('✅ admin/index.html créé (accès via /admin ou /admin/)');
   } else {
     console.error('❌ index.html non trouvé dans dist/');
     process.exit(1);
