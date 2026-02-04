@@ -686,7 +686,7 @@ async function handleRegister(clientId, data) {
     client.current_page = data.page || '/';
     console.log(`[handleRegister] 📝 Client ${clientId} role changed from '${previousRole || 'null'}' to '${client.role}'`);
   } else {
-    console.log(`[handleRegister] ⚠️  Client ${clientId} already registered with role '${newRole}' and notification sent, skipping notification but updating page if needed...`);
+    console.log(`[handleRegister] ⚠️  Client ${clientId} already registered with role '${newRole}', updating page if needed...`);
     // Mettre à jour seulement la page si elle a changé
     if (data.page && data.page !== client.current_page) {
       client.current_page = data.page;
