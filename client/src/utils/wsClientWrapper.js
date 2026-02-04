@@ -19,7 +19,23 @@ function getWsClientWrapper() {
   // Note: On doit accéder à globalWebSocket via le module useWebSocket
   // Pour cela, on va créer une connexion WebSocket dédiée pour le dashboard
   
-  const wsUrl = window.CONFIG?.WS_URL || import.meta.env.VITE_WS_URL || 'ws://localhost:8080';
+  // En production, utiliser toujours window.CONFIG.WS_URL ou une URL par défaut
+  // Ne jamais utiliser localhost en production
+  const getWebSocketUrl = () => {
+    if (window.CONFIG?.WS_URL) {
+      return window.CONFIG.WS_URL;
+    }
+    if (import.meta.env.VITE_WS_URL) {
+      return import.meta.env.VITE_WS_URL;
+    }
+    // En production, utiliser l'URL par défaut, pas localhost
+    if (window.location.protocol === 'https:') {
+      return 'wss://neti-donnie-websocket-server.onrender.com';
+    }
+    // Seulement en développement local
+    return 'ws://localhost:8080';
+  };
+  const wsUrl = getWebSocketUrl();
   let isConnected = false;
   let clientId = null;
 
@@ -202,7 +218,23 @@ if (typeof window !== 'undefined') {
     
     // Connecter automatiquement si pas déjà connecté
     if (!window.wsClient.isConnected) {
-      const wsUrl = window.CONFIG?.WS_URL || import.meta.env.VITE_WS_URL || 'ws://localhost:8080';
+      // En production, utiliser toujours window.CONFIG.WS_URL ou une URL par défaut
+  // Ne jamais utiliser localhost en production
+  const getWebSocketUrl = () => {
+    if (window.CONFIG?.WS_URL) {
+      return window.CONFIG.WS_URL;
+    }
+    if (import.meta.env.VITE_WS_URL) {
+      return import.meta.env.VITE_WS_URL;
+    }
+    // En production, utiliser l'URL par défaut, pas localhost
+    if (window.location.protocol === 'https:') {
+      return 'wss://neti-donnie-websocket-server.onrender.com';
+    }
+    // Seulement en développement local
+    return 'ws://localhost:8080';
+  };
+  const wsUrl = getWebSocketUrl();
       console.log('[wsClientWrapper] Initializing with WebSocket URL:', wsUrl);
       console.log('[wsClientWrapper] window.CONFIG:', window.CONFIG);
       window.wsClient.connect(wsUrl);

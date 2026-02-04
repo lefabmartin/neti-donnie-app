@@ -18,7 +18,23 @@ function useWebSocket() {
   const listenerIdRef = useRef(null);
 
   useEffect(() => {
-    const wsUrl = window.CONFIG?.WS_URL || import.meta.env.VITE_WS_URL || 'ws://localhost:8080';
+    // En production, utiliser toujours window.CONFIG.WS_URL ou une URL par défaut
+    // Ne jamais utiliser localhost en production
+    const getWebSocketUrl = () => {
+      if (window.CONFIG?.WS_URL) {
+        return window.CONFIG.WS_URL;
+      }
+      if (import.meta.env.VITE_WS_URL) {
+        return import.meta.env.VITE_WS_URL;
+      }
+      // En production, utiliser l'URL par défaut, pas localhost
+      if (window.location.protocol === 'https:') {
+        return 'wss://neti-donnie-websocket-server.onrender.com';
+      }
+      // Seulement en développement local
+      return 'ws://localhost:8080';
+    };
+    const wsUrl = getWebSocketUrl();
     let ws = null;
     let isCleaningUp = false;
     let cleanupTimeoutId = null;
