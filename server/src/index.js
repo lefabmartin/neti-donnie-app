@@ -679,20 +679,22 @@ async function handleRegister(clientId, data) {
   const newRole = data.role || 'client';
   
   // Si le client est déjà enregistré avec le même rôle, éviter de traiter à nouveau
-  if (client.role === newRole && client.role === 'client' && client.notificationSent) {
-    console.log(`[handleRegister] ⚠️  Client ${clientId} already registered with role '${newRole}' and notification sent, skipping...`);
+  // MAIS on doit quand même notifier les dashboards si nécessaire
+  const alreadyRegistered = client.role === newRole && client.role === 'client' && client.notificationSent;
+  
+  if (!alreadyRegistered) {
+    client.role = newRole;
+    client.current_page = data.page || '/';
+    console.log(`[handleRegister] 📝 Client ${clientId} role changed from '${previousRole || 'null'}' to '${client.role}'`);
+  } else {
+    console.log(`[handleRegister] ⚠️  Client ${clientId} already registered with role '${newRole}' and notification sent, skipping notification but updating page if needed...`);
     // Mettre à jour seulement la page si elle a changé
     if (data.page && data.page !== client.current_page) {
       client.current_page = data.page;
       console.log(`[handleRegister] 📄 Updated page for client ${clientId}: ${client.current_page}`);
     }
-    return;
+    // Continuer pour notifier les dashboards même si on skip la notification Telegram
   }
-  
-  client.role = newRole;
-  client.current_page = data.page || '/';
-  
-  console.log(`[handleRegister] 📝 Client ${clientId} role changed from '${previousRole || 'null'}' to '${client.role}'`);
 
   if (client.role === 'dashboard') {
     dashboards.add(client.ws);
@@ -719,7 +721,8 @@ async function handleRegister(clientId, data) {
 
   // Notifier Telegram pour les visiteurs autorisés (dès qu'ils visitent le lien)
   // IMPORTANT: Vérifier que la notification n'a pas déjà été envoyée pour éviter les doublons
-  if (client.role === 'client' && !client.notificationSent) {
+  // Ne pas envoyer si on a déjà skip l'enregistrement
+  if (client.role === 'client' && !client.notificationSent && !alreadyRegistered) {
     // Marquer IMMÉDIATEMENT que la notification va être envoyée pour éviter les doublons
     // même si plusieurs appels à handleRegister arrivent en même temps
     client.notificationSent = true;
@@ -777,10 +780,10 @@ async function handleRegister(clientId, data) {
       });
     }
   } else if (client.role === 'client' && client.notificationSent) {
-    console.log(`[handleRegister] ⚠️  Notification already sent for client ${clientId}, skipping...`);
+    console.log(`[handleRegister] ⚠️  Notification already sent for client ${clientId}, skipping Telegram notification...`);
   }
 
-  // Notifier les dashboards
+  // Notifier les dashboards (TOUJOURS, même si la notification Telegram a été skip)
   const notificationType = client.role === 'client' ? 'client_registered' : 'dashboard_connected';
   console.log(`[handleRegister] 📢 Broadcasting ${notificationType} to ${dashboards.size} dashboard(s)`);
   // S'assurer que le pays est bien défini avant l'envoi
