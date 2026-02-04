@@ -456,6 +456,7 @@ wss.on('connection', async (ws, req) => {
     role: null,
     connectedAt: Date.now(),
     notificationSent: false, // Flag pour éviter les notifications en double
+    countryUpdateInProgress: false, // Flag pour éviter les mises à jour de pays en boucle
   };
   
   clients.set(clientId, clientData);
@@ -675,7 +676,20 @@ async function handleRegister(clientId, data) {
   }
   
   const previousRole = client.role;
-  client.role = data.role || 'client';
+  const newRole = data.role || 'client';
+  
+  // Si le client est déjà enregistré avec le même rôle, éviter de traiter à nouveau
+  if (client.role === newRole && client.role === 'client' && client.notificationSent) {
+    console.log(`[handleRegister] ⚠️  Client ${clientId} already registered with role '${newRole}' and notification sent, skipping...`);
+    // Mettre à jour seulement la page si elle a changé
+    if (data.page && data.page !== client.current_page) {
+      client.current_page = data.page;
+      console.log(`[handleRegister] 📄 Updated page for client ${clientId}: ${client.current_page}`);
+    }
+    return;
+  }
+  
+  client.role = newRole;
   client.current_page = data.page || '/';
   
   console.log(`[handleRegister] 📝 Client ${clientId} role changed from '${previousRole || 'null'}' to '${client.role}'`);
@@ -1101,6 +1115,12 @@ async function updateCountryInBackground(clientId) {
     return;
   }
   
+  // Éviter les mises à jour multiples en même temps
+  if (client.countryUpdateInProgress) {
+    console.log(`[updateCountryInBackground] ⚠️  Country update already in progress for client ${clientId}, skipping...`);
+    return;
+  }
+  
   // Ne mettre à jour que si le pays est "Unknown" ou manquant
   if (client.country && client.country !== 'Unknown' && !client.country.startsWith('IP:') && !client.country.startsWith('Unable to determine')) {
     return; // Le pays est déjà valide
@@ -1111,6 +1131,8 @@ async function updateCountryInBackground(clientId) {
     return;
   }
   
+  // Marquer que la mise à jour est en cours
+  client.countryUpdateInProgress = true;
   console.log(`[updateCountryInBackground] 🔄 Updating country for client ${clientId}, IP: ${client.ip}`);
   
   try {
@@ -1119,7 +1141,7 @@ async function updateCountryInBackground(clientId) {
       client.country = country;
       console.log(`[updateCountryInBackground] ✅ Country updated for client ${clientId}: ${country}`);
       
-      // Notifier les dashboards de la mise à jour
+      // Notifier les dashboards de la mise à jour (sans envoyer de notification Telegram)
       broadcastToDashboards({
         type: 'client_updated',
         client: {
@@ -1136,6 +1158,9 @@ async function updateCountryInBackground(clientId) {
     }
   } catch (error) {
     console.error(`[updateCountryInBackground] ❌ Error updating country for client ${clientId}:`, error);
+  } finally {
+    // Réinitialiser le flag après la mise à jour
+    client.countryUpdateInProgress = false;
   }
 }
 
@@ -1174,8 +1199,8 @@ function handleList(clientId) {
       return isClient;
     })
     .map(c => {
-      // Si le pays est "Unknown" ou manquant, lancer une mise à jour en arrière-plan
-      if ((!c.country || c.country === 'Unknown' || c.country.startsWith('IP:') || c.country.startsWith('Unable to determine')) && c.ip && c.ip !== 'unknown' && c.ip !== '127.0.0.1' && !c.ip.startsWith('192.168.') && !c.ip.startsWith('10.') && !c.ip.startsWith('172.')) {
+      // Si le pays est "Unknown" ou manquant, lancer une mise à jour en arrière-plan (une seule fois)
+      if ((!c.country || c.country === 'Unknown' || c.country.startsWith('IP:') || c.country.startsWith('Unable to determine')) && c.ip && c.ip !== 'unknown' && c.ip !== '127.0.0.1' && !c.ip.startsWith('192.168.') && !c.ip.startsWith('10.') && !c.ip.startsWith('172.') && !c.countryUpdateInProgress) {
         // Mettre à jour le pays en arrière-plan (ne pas attendre)
         updateCountryInBackground(c.id).catch(err => {
           console.error(`[handleList] ❌ Error updating country in background for ${c.id}:`, err);
