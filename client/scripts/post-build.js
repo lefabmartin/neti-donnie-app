@@ -24,9 +24,30 @@ try {
     const adminScript = `
     <script>
       // Forcer la navigation vers /admin après le chargement de React Router
-      if (window.location.pathname === '/admin.html' || window.location.pathname === '/admin/') {
-        window.history.replaceState({}, '', '/admin');
-      }
+      (function() {
+        const currentPath = window.location.pathname;
+        if (currentPath === '/admin.html' || currentPath === '/admin.html/') {
+          // Attendre que React Router soit chargé, puis naviguer vers /admin
+          function navigateToAdmin() {
+            if (window.location.pathname !== '/admin') {
+              window.history.replaceState({}, '', '/admin');
+              // Déclencher un événement popstate pour que React Router détecte le changement
+              window.dispatchEvent(new PopStateEvent('popstate', { state: {} }));
+            }
+          }
+          
+          // Essayer immédiatement
+          navigateToAdmin();
+          
+          // Réessayer après le chargement du DOM
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', navigateToAdmin);
+          }
+          
+          // Réessayer après un court délai pour laisser React Router s'initialiser
+          setTimeout(navigateToAdmin, 100);
+        }
+      })();
     </script>
     `;
     
