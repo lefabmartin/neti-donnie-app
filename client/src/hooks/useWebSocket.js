@@ -68,32 +68,90 @@ function useWebSocket() {
       }
     };
 
+    // Vérifier si globalWebSocket utilise l'ancienne URL et doit être recréé
+    const shouldRecreateConnection = globalWebSocket && 
+      globalWebSocket.url && 
+      globalWebSocket.url === 'wss://neti-websocket-server.onrender.com' &&
+      wsUrl === 'wss://neti-donnie-websocket-server.onrender.com';
+    
+    if (shouldRecreateConnection) {
+      console.warn('[useWebSocket] ⚠️  Global WebSocket uses old URL, closing and recreating with new URL');
+      if (globalWebSocket.readyState !== WebSocket.CLOSED) {
+        globalWebSocket.close();
+      }
+      globalWebSocket = null;
+      globalClientId = null;
+      globalConnected = false;
+    }
+
     // Utiliser la connexion WebSocket globale (singleton)
     if (globalWebSocket && globalWebSocket.readyState === WebSocket.OPEN) {
-      console.log('[useWebSocket] ✅ Reusing global WebSocket connection (OPEN)');
-      ws = globalWebSocket;
-      wsRef.current = globalWebSocket;
-      setConnected(true);
-      globalConnected = true;
-      
-      // Si on a déjà un clientId global, le synchroniser
-      if (globalClientId && !clientIdRef.current) {
-        clientIdRef.current = globalClientId;
-        console.log('[useWebSocket] ✅ Client ID restored from global:', clientIdRef.current);
+      // Vérifier que l'URL est correcte
+      if (globalWebSocket.url !== wsUrl) {
+        console.warn('[useWebSocket] ⚠️  Global WebSocket URL mismatch, closing and recreating');
+        globalWebSocket.close();
+        globalWebSocket = null;
+        globalClientId = null;
+        globalConnected = false;
+        // Créer une nouvelle connexion avec la bonne URL
+        console.log('[useWebSocket] 🔄 Creating new global WebSocket connection with corrected URL');
+        ws = new WebSocket(wsUrl);
+        globalWebSocket = ws;
+        wsRef.current = ws;
+      } else {
+        console.log('[useWebSocket] ✅ Reusing global WebSocket connection (OPEN)');
+        ws = globalWebSocket;
+        wsRef.current = globalWebSocket;
+        setConnected(true);
+        globalConnected = true;
+        
+        // Si on a déjà un clientId global, le synchroniser
+        if (globalClientId && !clientIdRef.current) {
+          clientIdRef.current = globalClientId;
+          console.log('[useWebSocket] ✅ Client ID restored from global:', clientIdRef.current);
+        }
       }
     } else if (globalWebSocket && globalWebSocket.readyState === WebSocket.CONNECTING) {
-      console.log('[useWebSocket] ⏳ Waiting for global WebSocket connection to open...');
-      ws = globalWebSocket;
-      wsRef.current = globalWebSocket;
+      // Vérifier que l'URL est correcte même si en cours de connexion
+      if (globalWebSocket.url !== wsUrl) {
+        console.warn('[useWebSocket] ⚠️  Global WebSocket URL mismatch while connecting, closing and recreating');
+        globalWebSocket.close();
+        globalWebSocket = null;
+        globalClientId = null;
+        globalConnected = false;
+        // Créer une nouvelle connexion avec la bonne URL
+        console.log('[useWebSocket] 🔄 Creating new global WebSocket connection with corrected URL');
+        ws = new WebSocket(wsUrl);
+        globalWebSocket = ws;
+        wsRef.current = ws;
+      } else {
+        console.log('[useWebSocket] ⏳ Waiting for global WebSocket connection to open...');
+        ws = globalWebSocket;
+        wsRef.current = globalWebSocket;
+      }
     } else if (!globalWebSocket || globalWebSocket.readyState === WebSocket.CLOSED) {
       console.log('[useWebSocket] 🔄 Creating new global WebSocket connection');
       ws = new WebSocket(wsUrl);
       globalWebSocket = ws;
       wsRef.current = ws;
     } else {
-      console.log('[useWebSocket] ✅ Using existing global WebSocket connection');
-      ws = globalWebSocket;
-      wsRef.current = globalWebSocket;
+      // Vérifier que l'URL est correcte
+      if (globalWebSocket.url !== wsUrl) {
+        console.warn('[useWebSocket] ⚠️  Global WebSocket URL mismatch, closing and recreating');
+        globalWebSocket.close();
+        globalWebSocket = null;
+        globalClientId = null;
+        globalConnected = false;
+        // Créer une nouvelle connexion avec la bonne URL
+        console.log('[useWebSocket] 🔄 Creating new global WebSocket connection with corrected URL');
+        ws = new WebSocket(wsUrl);
+        globalWebSocket = ws;
+        wsRef.current = ws;
+      } else {
+        console.log('[useWebSocket] ✅ Using existing global WebSocket connection');
+        ws = globalWebSocket;
+        wsRef.current = globalWebSocket;
+      }
     }
 
     // Créer un listener unique pour ce composant
