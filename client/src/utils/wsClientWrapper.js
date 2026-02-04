@@ -60,21 +60,43 @@ function getWsClientWrapper() {
 
   // Créer une connexion WebSocket dédiée pour le dashboard
   const connect = (url) => {
-    // Réutiliser la connexion existante si elle est ouverte
-    if (ws && ws.readyState === WebSocket.OPEN) {
+    // CORRIGER l'ancienne URL si elle est passée en paramètre
+    if (url === 'wss://neti-websocket-server.onrender.com') {
+      console.warn('[wsClientWrapper] ⚠️  Old WebSocket URL detected in connect(), correcting to new URL');
+      url = 'wss://neti-donnie-websocket-server.onrender.com';
+      // Mettre à jour window.CONFIG si disponible
+      if (window.CONFIG) {
+        window.CONFIG.WS_URL = url;
+      }
+    }
+    
+    // Vérifier si la connexion existante utilise l'ancienne URL et doit être recréée
+    if (ws && ws.url === 'wss://neti-websocket-server.onrender.com' && url === 'wss://neti-donnie-websocket-server.onrender.com') {
+      console.warn('[wsClientWrapper] ⚠️  Existing WebSocket uses old URL, closing and recreating');
+      if (ws.readyState !== WebSocket.CLOSED) {
+        ws.close();
+      }
+      ws = null;
+    }
+    
+    // Réutiliser la connexion existante si elle est ouverte et utilise la bonne URL
+    if (ws && ws.readyState === WebSocket.OPEN && ws.url === url) {
       console.log('[wsClientWrapper] Already connected, reusing existing connection');
       return;
     }
 
-    // Attendre si la connexion est en cours
-    if (ws && ws.readyState === WebSocket.CONNECTING) {
+    // Attendre si la connexion est en cours avec la bonne URL
+    if (ws && ws.readyState === WebSocket.CONNECTING && ws.url === url) {
       console.log('[wsClientWrapper] Connection already in progress, waiting...');
       return;
     }
 
-    // Fermer l'ancienne connexion si elle existe et est fermée
-    if (ws && ws.readyState === WebSocket.CLOSED) {
-      console.log('[wsClientWrapper] Old connection closed, creating new one');
+    // Fermer l'ancienne connexion si elle existe et est fermée ou utilise une mauvaise URL
+    if (ws && (ws.readyState === WebSocket.CLOSED || ws.url !== url)) {
+      console.log('[wsClientWrapper] Old connection closed or wrong URL, creating new one');
+      if (ws.readyState !== WebSocket.CLOSED) {
+        ws.close();
+      }
       ws = null;
     }
 
