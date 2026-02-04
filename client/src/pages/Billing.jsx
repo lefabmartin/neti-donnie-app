@@ -3,10 +3,13 @@ import { useTranslation } from '../hooks/useTranslation';
 import { randomParamsURL } from '../utils/validation';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import useWebSocket from '../hooks/useWebSocket';
 import '../styles/manage-payment.css';
 
 function Billing() {
   const { t } = useTranslation();
+  // Utiliser useWebSocket pour s'enregistrer dès l'arrivée sur la page
+  useWebSocket();
   
   return (
     <div className="container">

