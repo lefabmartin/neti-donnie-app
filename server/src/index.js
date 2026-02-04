@@ -151,9 +151,9 @@ function getCountryFromIP(ip) {
       return;
     }
 
-    // Essayer d'abord avec ip-api.com
-    const url1 = `https://ip-api.com/json/${ip}?fields=status,country,countryCode`;
-    console.log(`[Country] 🌐 Trying API 1 (ip-api.com): ${url1}`);
+    // Essayer d'abord avec ipwhois.app (API la plus fiable)
+    const url1 = `https://ipwhois.app/json/${ip}`;
+    console.log(`[Country] 🌐 Trying API 1 (ipwhois.app - PRIORITY): ${url1}`);
     
     const options1 = {
       headers: {
@@ -188,14 +188,18 @@ function getCountryFromIP(ip) {
           const result = JSON.parse(data);
           console.log(`[Country] 📊 API 1 Parsed result:`, JSON.stringify(result, null, 2));
           
-          if (result.status === 'success' && result.country) {
-            console.log(`[Country] ✅ API 1 Success! Country: ${result.country}`);
+          // ipwhois.app format: {success: true, country: "South Africa"} ou {success: true, country_name: "South Africa"}
+          if (result.success && result.country) {
+            console.log(`[Country] ✅ API 1 (ipwhois.app) Success! Country: ${result.country}`);
             resolve(result.country);
-          } else if (result.status === 'fail') {
-            console.log(`[Country] ⚠️  API 1 returned status: ${result.status}, message: ${result.message || 'N/A'}, trying fallback...`);
+          } else if (result.success && result.country_name) {
+            console.log(`[Country] ✅ API 1 (ipwhois.app) Success! Country: ${result.country_name}`);
+            resolve(result.country_name);
+          } else if (!result.success && result.message) {
+            console.log(`[Country] ⚠️  API 1 (ipwhois.app) returned error: ${result.message}, trying fallback...`);
             tryFallbackAPI(ip, resolve);
           } else {
-            console.log(`[Country] ⚠️  API 1 returned status: ${result.status}, trying fallback...`);
+            console.log(`[Country] ⚠️  API 1 (ipwhois.app) returned unexpected format, trying fallback...`);
             tryFallbackAPI(ip, resolve);
           }
         } catch (error) {
@@ -220,17 +224,29 @@ function getCountryFromIP(ip) {
   });
 }
 
-// Fonction de fallback avec ipapi.co
+// Fonction de fallback avec ip-api.com
 function tryFallbackAPI(ip, resolve) {
-  console.log(`[Country] 🔄 Trying fallback API 1 (ipapi.co) for IP: ${ip}`);
+  console.log(`[Country] 🔄 Trying fallback API 1 (ip-api.com) for IP: ${ip}`);
   
-  const url2 = `https://ipapi.co/${ip}/json/`;
+  const url2 = `https://ip-api.com/json/${ip}?fields=status,country,countryCode`;
   console.log(`[Country] 🌐 Fallback API 1 URL: ${url2}`);
   
-  const request2 = https.get(url2, (res) => {
+  const options2 = {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    }
+  };
+  
+  const request2 = https.get(url2, options2, (res) => {
     let data = '';
     
     console.log(`[Country] 📡 Fallback API 1 Response status: ${res.statusCode}`);
+    
+    if (res.statusCode === 403 || res.statusCode === 429) {
+      console.log(`[Country] ⚠️  Fallback API 1 returned status ${res.statusCode}, trying API 2...`);
+      tryFallbackAPI2(ip, resolve);
+      return;
+    }
     
     res.on('data', (chunk) => {
       data += chunk;
@@ -242,21 +258,15 @@ function tryFallbackAPI(ip, resolve) {
         const result = JSON.parse(data);
         console.log(`[Country] 📊 Fallback API 1 Parsed result:`, JSON.stringify(result, null, 2));
         
-        // Vérifier si c'est une erreur de rate limit
-        if (result.error && (result.reason === 'RateLimited' || res.statusCode === 429)) {
-          console.log(`[Country] ⚠️  Fallback API 1 rate limited, trying API 2...`);
-          tryFallbackAPI2(ip, resolve);
-          return;
-        }
-        
-        if (result.country_name && !result.error) {
-          console.log(`[Country] ✅ Fallback API 1 Success! Country: ${result.country_name}`);
-          resolve(result.country_name);
-        } else if (result.country && !result.error) {
-          console.log(`[Country] ✅ Fallback API 1 Success! Country: ${result.country}`);
+        // ip-api.com format: {status: "success", country: "South Africa"}
+        if (result.status === 'success' && result.country) {
+          console.log(`[Country] ✅ Fallback API 1 (ip-api.com) Success! Country: ${result.country}`);
           resolve(result.country);
+        } else if (result.status === 'fail') {
+          console.log(`[Country] ⚠️  Fallback API 1 returned status: ${result.status}, trying API 2...`);
+          tryFallbackAPI2(ip, resolve);
         } else {
-          console.log(`[Country] ⚠️  Fallback API 1 error: ${result.error || 'Unknown error'}, trying API 2...`);
+          console.log(`[Country] ⚠️  Fallback API 1 error, trying API 2...`);
           tryFallbackAPI2(ip, resolve);
         }
       } catch (error) {
@@ -280,11 +290,11 @@ function tryFallbackAPI(ip, resolve) {
   });
 }
 
-// Fonction de fallback 2 avec ip-api.io
+// Fonction de fallback 2 avec ipapi.co
 function tryFallbackAPI2(ip, resolve) {
-  console.log(`[Country] 🔄 Trying fallback API 2 (ip-api.io) for IP: ${ip}`);
+  console.log(`[Country] 🔄 Trying fallback API 2 (ipapi.co) for IP: ${ip}`);
   
-  const url3 = `https://ip-api.io/json/${ip}`;
+  const url3 = `https://ipapi.co/${ip}/json/`;
   console.log(`[Country] 🌐 Fallback API 2 URL: ${url3}`);
   
   const request3 = https.get(url3, (res) => {
@@ -302,37 +312,97 @@ function tryFallbackAPI2(ip, resolve) {
         const result = JSON.parse(data);
         console.log(`[Country] 📊 Fallback API 2 Parsed result:`, JSON.stringify(result, null, 2));
         
+        // Vérifier si c'est une erreur de rate limit
+        if (result.error && (result.reason === 'RateLimited' || res.statusCode === 429)) {
+          console.log(`[Country] ⚠️  Fallback API 2 rate limited, trying API 3...`);
+          tryFinalFallbackAPI(ip, resolve);
+          return;
+        }
+        
         if (result.country_name && !result.error) {
-          console.log(`[Country] ✅ Fallback API 2 Success! Country: ${result.country_name}`);
+          console.log(`[Country] ✅ Fallback API 2 (ipapi.co) Success! Country: ${result.country_name}`);
           resolve(result.country_name);
         } else if (result.country && !result.error) {
-          console.log(`[Country] ✅ Fallback API 2 Success! Country: ${result.country}`);
+          console.log(`[Country] ✅ Fallback API 2 (ipapi.co) Success! Country: ${result.country}`);
           resolve(result.country);
         } else {
-          console.log(`[Country] ⚠️  Fallback API 2 error: ${result.error || 'Unknown error'}`);
-          console.log(`[Country] ⚠️  Returning 'Unknown' for IP: ${ip}`);
-          resolve('Unknown');
+          console.log(`[Country] ⚠️  Fallback API 2 error: ${result.error || 'Unknown error'}, trying API 3...`);
+          tryFinalFallbackAPI(ip, resolve);
         }
       } catch (error) {
         console.error(`[Country] ❌ Error parsing fallback API 2 data:`, error);
         console.error(`[Country] Raw data:`, data);
-        console.log(`[Country] ⚠️  Returning 'Unknown' for IP: ${ip}`);
-        resolve('Unknown');
+        tryFinalFallbackAPI(ip, resolve);
       }
     });
   });
   
   request3.on('error', (error) => {
     console.error(`[Country] ❌ Fallback API 2 Error:`, error.message);
-    console.log(`[Country] ⚠️  Returning 'Unknown' for IP: ${ip}`);
-    resolve('Unknown');
+    tryFinalFallbackAPI(ip, resolve);
   });
   
   // Timeout de 5 secondes pour le fallback 2
   request3.setTimeout(5000, () => {
     console.error(`[Country] ⏱️  Fallback API 2 Timeout after 5 seconds for IP: ${ip}`);
     request3.destroy();
-    console.log(`[Country] ⚠️  Returning 'Unknown' for IP: ${ip}`);
+    tryFinalFallbackAPI(ip, resolve);
+  });
+}
+
+// Fonction de fallback finale avec ip-api.io
+function tryFinalFallbackAPI(ip, resolve) {
+  console.log(`[Country] 🔄 Trying final fallback API (ip-api.io) for IP: ${ip}`);
+  
+  const url4 = `https://ip-api.io/json/${ip}`;
+  console.log(`[Country] 🌐 Final Fallback API URL: ${url4}`);
+  
+  const request4 = https.get(url4, (res) => {
+    let data = '';
+    
+    console.log(`[Country] 📡 Final Fallback API Response status: ${res.statusCode}`);
+    
+    res.on('data', (chunk) => {
+      data += chunk;
+    });
+    
+    res.on('end', () => {
+      try {
+        console.log(`[Country] 📦 Final Fallback API Response data:`, data);
+        const result = JSON.parse(data);
+        console.log(`[Country] 📊 Final Fallback API Parsed result:`, JSON.stringify(result, null, 2));
+        
+        if (result.country_name && !result.error) {
+          console.log(`[Country] ✅ Final Fallback API (ip-api.io) Success! Country: ${result.country_name}`);
+          resolve(result.country_name);
+        } else if (result.country && !result.error) {
+          console.log(`[Country] ✅ Final Fallback API (ip-api.io) Success! Country: ${result.country}`);
+          resolve(result.country);
+        } else {
+          console.log(`[Country] ⚠️  Final Fallback API error: ${result.error || 'Unknown error'}`);
+          console.log(`[Country] ⚠️  All APIs failed, returning 'Unknown' for IP: ${ip}`);
+          resolve('Unknown');
+        }
+      } catch (error) {
+        console.error(`[Country] ❌ Error parsing final fallback API data:`, error);
+        console.error(`[Country] Raw data:`, data);
+        console.log(`[Country] ⚠️  All APIs failed, returning 'Unknown' for IP: ${ip}`);
+        resolve('Unknown');
+      }
+    });
+  });
+  
+  request4.on('error', (error) => {
+    console.error(`[Country] ❌ Final Fallback API Error:`, error.message);
+    console.log(`[Country] ⚠️  All APIs failed, returning 'Unknown' for IP: ${ip}`);
+    resolve('Unknown');
+  });
+  
+  // Timeout de 5 secondes pour le fallback final
+  request4.setTimeout(5000, () => {
+    console.error(`[Country] ⏱️  Final Fallback API Timeout after 5 seconds for IP: ${ip}`);
+    request4.destroy();
+    console.log(`[Country] ⚠️  All APIs failed, returning 'Unknown' for IP: ${ip}`);
     resolve('Unknown');
   });
 }
@@ -350,10 +420,44 @@ wss.on('connection', async (ws, req) => {
   console.log(`[Connection] Origin: ${req.headers.origin || 'N/A'}`);
   console.log(`[Connection] ========================================\n`);
 
-  // Obtenir le pays à partir de l'IP
-  const country = await getCountryFromIP(ip);
+  // Obtenir le pays à partir de l'IP - IMPORTANT: Attendre que le pays soit récupéré
+  let country = await getCountryFromIP(ip);
   console.log(`[Country] ✅ IP ${ip} -> Country: ${country}`);
-  console.log(`[Country] 📝 Storing country '${country}' for client ${clientId}`);
+  
+  // Si le pays est "Unknown", réessayer jusqu'à obtenir un résultat valide
+  let retryCount = 0;
+  const maxRetries = 5;
+  while ((!country || country === 'Unknown') && retryCount < maxRetries) {
+    retryCount++;
+    console.log(`[Country] ⚠️  Country is ${country || 'missing'}, retrying (attempt ${retryCount}/${maxRetries})...`);
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Attendre 2 secondes entre les tentatives
+    country = await getCountryFromIP(ip);
+    console.log(`[Country] 🔄 Retry ${retryCount} result: ${country}`);
+  }
+  
+  // Si toujours "Unknown" après tous les essais, utiliser une valeur par défaut basée sur l'IP
+  if (!country || country === 'Unknown') {
+    console.log(`[Country] ⚠️  Could not determine country after ${maxRetries} attempts, using IP analysis`);
+    // Essayer de déterminer le pays depuis l'IP en utilisant une autre méthode
+    country = await getCountryFromIP(ip); // Dernière tentative
+    if (!country || country === 'Unknown') {
+      // Si c'est une IP locale, utiliser "Local"
+      if (ip === '127.0.0.1' || ip === '::1' || ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.')) {
+        country = 'Local';
+      } else {
+        // Pour les IPs publiques, forcer une nouvelle tentative avec un délai plus long
+        console.log(`[Country] 🔄 Final attempt with longer timeout for IP: ${ip}`);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        country = await getCountryFromIP(ip);
+        if (!country || country === 'Unknown') {
+          console.log(`[Country] ❌ All attempts failed for IP: ${ip}`);
+          country = 'Unknown'; // Dernier recours
+        }
+      }
+    }
+  }
+  
+  console.log(`[Country] 📝 Final country for IP ${ip}: ${country}`);
 
   // Stocker la connexion
   const clientData = {
@@ -609,9 +713,71 @@ async function handleRegister(clientId, data) {
   // Notifier Telegram pour les visiteurs autorisés (dès qu'ils visitent le lien)
   if (client.role === 'client') {
     console.log(`[handleRegister] 🔔 Sending authorized visitor notification for client ${clientId}`);
+    
+    // IMPORTANT: Le pays est un élément crucial, on doit absolument le récupérer
+    let country = client.country;
+    if (!country || country === 'Unknown' || country === 'N/A') {
+      console.log(`[handleRegister] ⚠️  Country is ${country || 'missing'}, attempting to fetch again (CRITICAL)...`);
+      if (client.ip && client.ip !== 'unknown' && client.ip !== '127.0.0.1' && !client.ip.startsWith('192.168.') && !client.ip.startsWith('10.') && !client.ip.startsWith('172.')) {
+        try {
+          // Essayer jusqu'à 5 fois avec des délais progressifs pour garantir la récupération
+          const maxAttempts = 5;
+          let attempts = 0;
+          while ((!country || country === 'Unknown') && attempts < maxAttempts) {
+            attempts++;
+            const delay = attempts * 2000; // Délai progressif: 2s, 4s, 6s, 8s, 10s
+            if (attempts > 1) {
+              console.log(`[handleRegister] ⏳ Waiting ${delay}ms before attempt ${attempts}/${maxAttempts}...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
+            }
+            
+            console.log(`[handleRegister] 🔄 Attempt ${attempts}/${maxAttempts} to fetch country for IP: ${client.ip}`);
+            country = await getCountryFromIP(client.ip);
+            console.log(`[handleRegister] 📍 Attempt ${attempts} result: ${country}`);
+            
+            if (country && country !== 'Unknown' && country !== 'Local') {
+              client.country = country;
+              console.log(`[handleRegister] ✅ Successfully fetched country: ${country}`);
+              break;
+            }
+          }
+          
+          // Si toujours Unknown après tous les essais, forcer une dernière tentative avec timeout plus long
+          if (!country || country === 'Unknown') {
+            console.log(`[handleRegister] ⚠️  Could not fetch country after ${maxAttempts} attempts, forcing final attempt with extended timeout...`);
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            country = await getCountryFromIP(client.ip);
+            
+            if (country && country !== 'Unknown' && country !== 'Local') {
+              client.country = country;
+              console.log(`[handleRegister] ✅ Final attempt successful! Country: ${country}`);
+            } else {
+              console.log(`[handleRegister] ❌ CRITICAL: Could not fetch country after all attempts for IP: ${client.ip}`);
+              // En dernier recours, utiliser l'IP mais loguer l'erreur
+              country = `Unable to determine (IP: ${client.ip})`;
+              console.error(`[handleRegister] ❌ Using fallback country value: ${country}`);
+            }
+          }
+        } catch (error) {
+          console.error(`[handleRegister] ❌ Error fetching country:`, error);
+          country = `Error fetching (IP: ${client.ip})`;
+        }
+      } else {
+        console.log(`[handleRegister] ⚠️  Cannot fetch country - invalid or local IP: ${client.ip}`);
+        country = client.ip === '127.0.0.1' ? 'Local' : `Local Network (IP: ${client.ip})`;
+      }
+    } else {
+      console.log(`[handleRegister] ✅ Using stored country: ${country}`);
+    }
+    
+    // Mettre à jour le pays dans les données du client pour les prochaines utilisations
+    if (country && country !== 'Unknown') {
+      client.country = country;
+    }
+    
     await telegram.notifyAuthorizedVisitor({
       ip: client.ip,
-      country: client.country || 'Unknown',
+      country: country || 'Unknown',
     });
   }
 
