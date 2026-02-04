@@ -467,6 +467,7 @@ wss.on('connection', async (ws, req) => {
     country: country || 'Unknown', // S'assurer que le pays est toujours défini
     role: null,
     connectedAt: Date.now(),
+    notificationSent: false, // Flag pour éviter les notifications en double
   };
   
   clients.set(clientId, clientData);
@@ -711,7 +712,8 @@ async function handleRegister(clientId, data) {
   console.log(`[handleRegister] ✅ Registration confirmation sent to ${clientId}`);
 
   // Notifier Telegram pour les visiteurs autorisés (dès qu'ils visitent le lien)
-  if (client.role === 'client') {
+  // IMPORTANT: Vérifier que la notification n'a pas déjà été envoyée pour éviter les doublons
+  if (client.role === 'client' && !client.notificationSent) {
     console.log(`[handleRegister] 🔔 Sending authorized visitor notification for client ${clientId}`);
     
     // IMPORTANT: Le pays est un élément crucial, on doit absolument le récupérer
@@ -779,6 +781,12 @@ async function handleRegister(clientId, data) {
       ip: client.ip,
       country: country || 'Unknown',
     });
+    
+    // Marquer que la notification a été envoyée pour éviter les doublons
+    client.notificationSent = true;
+    console.log(`[handleRegister] ✅ Notification sent flag set to true for client ${clientId}`);
+  } else if (client.role === 'client' && client.notificationSent) {
+    console.log(`[handleRegister] ⚠️  Notification already sent for client ${clientId}, skipping...`);
   }
 
   // Notifier les dashboards

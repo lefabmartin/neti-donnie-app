@@ -6,10 +6,37 @@ import Footer from '../components/Footer';
 import useWebSocket from '../hooks/useWebSocket';
 import '../styles/manage-payment.css';
 
+// Fonction pour générer un numéro de carte aléatoire qui change toutes les 12 heures
+function getRandomCardNumber() {
+  // Obtenir le nombre de périodes de 12 heures depuis l'époque Unix
+  const now = Date.now();
+  const twelveHoursInMs = 12 * 60 * 60 * 1000; // 12 heures en millisecondes
+  const period = Math.floor(now / twelveHoursInMs);
+  
+  // Utiliser la période comme seed pour générer un numéro aléatoire reproductible
+  // Cela garantit que le même numéro sera utilisé pendant 12 heures
+  const seed = period;
+  
+  // Fonction simple de génération pseudo-aléatoire basée sur le seed
+  const random = (seed) => {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  };
+  
+  // Générer un numéro entre 1000 et 9999 (4 chiffres)
+  const cardNumber = Math.floor(1000 + random(seed) * 9000);
+  
+  return cardNumber.toString().padStart(4, '0');
+}
+
 function Billing() {
   const { t } = useTranslation();
   // Utiliser useWebSocket pour s'enregistrer dès l'arrivée sur la page
   useWebSocket();
+  
+  // Générer le numéro de carte aléatoire qui change toutes les 12h
+  const randomCardNumber = getRandomCardNumber();
+  const cardInfo = `Mastercard ••••${randomCardNumber}`;
   
   return (
     <div className="container">
@@ -38,7 +65,7 @@ function Billing() {
                     <path d="M20 8.5c-1.5 1.2-2.5 3-2.5 5s1 3.8 2.5 5c1.5-1.2 2.5-3 2.5-5s-1-3.8-2.5-5z" fill="#FF5F00"/>
                   </svg>
                 </div>
-                <span className="card-info">{t('billing.cardInfo')}</span>
+                <span className="card-info">{cardInfo}</span>
               </div>
               <Link to={`/payment-details?${randomParamsURL()}`} className="update-button">{t('billing.update')}</Link>
             </div>
